@@ -39,12 +39,12 @@ public:
     // Bool operators
     friend bool operator==(const Vector& lhs, const Vector& rhs) { return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z; }
     friend bool operator!=(const Vector& lhs, const Vector& rhs) { return !(lhs == rhs); }
-    // Vector arithmetics
+    // Vector arithmetic operators
     friend Vector operator+(const Vector& lhs, const Vector& rhs) { return { lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z }; }
     friend Vector operator-(const Vector& lhs, const Vector& rhs) { return { lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z }; }
     friend Vector operator*(const Vector& lhs, const Vector& rhs) { return { lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z }; }
     friend Vector operator/(const Vector& lhs, const Vector& rhs) { return { lhs.x / rhs.x, lhs.y / rhs.y, lhs.z / rhs.z }; }
-    // Scalar arithmetics
+    // Scalar arithmetic operators
     friend Vector operator+(const Vector& vec, float scalar) { return { vec.x + scalar, vec.y + scalar, vec.z + scalar }; }
     friend Vector operator-(const Vector& vec, float scalar) { return { vec.x - scalar, vec.y - scalar, vec.z - scalar }; }
     friend Vector operator*(const Vector& vec, float scalar) { return { vec.x * scalar, vec.y * scalar, vec.z * scalar }; }
@@ -53,7 +53,7 @@ public:
     friend Vector operator-(float scalar, const Vector& vec) { return { vec.x - scalar, vec.y - scalar, vec.z - scalar }; }
     friend Vector operator*(float scalar, const Vector& vec) { return { vec.x * scalar, vec.y * scalar, vec.z * scalar }; }
     friend Vector operator/(float scalar, const Vector& vec) { return { vec.x / scalar, vec.y / scalar, vec.z / scalar }; }
-
+    // Output stream operator
     friend std::ostream& operator<<(std::ostream& os, const Vector& vec) {
         return os << "[" << vec.x << ", " << vec.y << ", " << vec.z << "]";
     }
