@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <ostream>
+#include <stdexcept>
 
 namespace MyEngine {
 
@@ -11,6 +12,7 @@ public:
 
     Vector() : x(0), y(0), z(0) {}
     Vector(float x, float y, float z) : x(x), y(y), z(z) {}
+    Vector(float x) : Vector(x, x, x) {}
 
     float Magnitude() const {
         return std::sqrt(x * x + y * y + z * z);
@@ -28,25 +30,29 @@ public:
     }
 
     Vector& Invert() {
+        x *= -1.f;
+        y *= -1.f;
+        z *= -1.f;
         return *this;
     }
 
-    // Operators
-    friend bool operator==(const Vector& lhs, const Vector& rhs) {
-        return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z;
-    }
-
-    friend bool operator!=(const Vector& lhs, const Vector& rhs) {
-        return !(lhs == rhs);
-    }
-
-    friend Vector operator+(const Vector& lhs, const Vector& rhs) {
-        return { lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z };
-    }
-
-    friend Vector operator-(const Vector& lhs, const Vector& rhs) {
-        return { lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z };
-    }
+    // Bool operators
+    friend bool operator==(const Vector& lhs, const Vector& rhs) { return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z; }
+    friend bool operator!=(const Vector& lhs, const Vector& rhs) { return !(lhs == rhs); }
+    // Vector arithmetics
+    friend Vector operator+(const Vector& lhs, const Vector& rhs) { return { lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z }; }
+    friend Vector operator-(const Vector& lhs, const Vector& rhs) { return { lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z }; }
+    friend Vector operator*(const Vector& lhs, const Vector& rhs) { return { lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z }; }
+    friend Vector operator/(const Vector& lhs, const Vector& rhs) { return { lhs.x / rhs.x, lhs.y / rhs.y, lhs.z / rhs.z }; }
+    // Scalar arithmetics
+    friend Vector operator+(const Vector& vec, float scalar) { return { vec.x + scalar, vec.y + scalar, vec.z + scalar }; }
+    friend Vector operator-(const Vector& vec, float scalar) { return { vec.x - scalar, vec.y - scalar, vec.z - scalar }; }
+    friend Vector operator*(const Vector& vec, float scalar) { return { vec.x * scalar, vec.y * scalar, vec.z * scalar }; }
+    friend Vector operator/(const Vector& vec, float scalar) { return { vec.x / scalar, vec.y / scalar, vec.z / scalar }; }
+    friend Vector operator+(float scalar, const Vector& vec) { return { vec.x + scalar, vec.y + scalar, vec.z + scalar }; }
+    friend Vector operator-(float scalar, const Vector& vec) { return { vec.x - scalar, vec.y - scalar, vec.z - scalar }; }
+    friend Vector operator*(float scalar, const Vector& vec) { return { vec.x * scalar, vec.y * scalar, vec.z * scalar }; }
+    friend Vector operator/(float scalar, const Vector& vec) { return { vec.x / scalar, vec.y / scalar, vec.z / scalar }; }
 
     friend std::ostream& operator<<(std::ostream& os, const Vector& vec) {
         return os << "[" << vec.x << ", " << vec.y << ", " << vec.z << "]";
@@ -57,17 +63,17 @@ public:
         return Vector(vec).Normalize();
     }
 
-    // static Vector Inverted(const Vector& vec) {
-    //     return vec;
-    // }
+    static Vector Inverted(const Vector& vec) {
+        return Vector(vec).Invert();
+    }
 
-    // static float Dot(const Vector& lhs, const Vector& rhs) {
+    static float Dot(const Vector& lhs, const Vector& rhs) {
+        return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
+    }
 
-    // }
-
-    // static Vector Cross(const Vector& lhs, const Vector& rhs) {
-
-    // }
+    static Vector Cross(const Vector& lhs, const Vector& rhs) {
+        return { lhs.y * rhs.z - rhs.y * lhs.z, lhs.z * rhs.x - rhs.z * lhs.x, lhs.x * rhs.y - rhs.x * lhs.y };
+    }
 };
 
 }
