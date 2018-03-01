@@ -23,6 +23,7 @@ class Matrix {
     using NormalRow = Row<float>;
 
     constexpr static size_t size = 9;
+    constexpr static size_t width = 3;
     std::array<float, size> data;
 public:
     Matrix() = default;
@@ -65,11 +66,11 @@ public:
     }
     friend Matrix operator*(const Matrix& lhs, const Matrix& rhs) {
         Matrix out;
-        for (size_t j = 0; j < size; ++j)
-            for (size_t i = 0; i < size; ++i) {
+        for (size_t j = 0; j < width; ++j)
+            for (size_t i = 0; i < width; ++i) {
                 float sum = 0.f;
-                for (size_t k = 0; k < size; ++k)
-                    sum += lhs[i][k] * rhs[k][j];
+                for (size_t k = 0; k < width; ++k)
+                    sum += rhs[k][j] * lhs[i][k];
                 out[i][j] = sum;
             }
         return out;
@@ -77,9 +78,9 @@ public:
     // Output stream operator
     friend std::ostream& operator<<(std::ostream& os, const Matrix& mat) {
         os << "{ ";
-        for (size_t i = 0; i < size - 1; ++i)
-            os << mat.data[i] << ", ";
-        return os << mat.data[size - 1] << " }";
+        for (size_t i = 0; i < size; ++i)
+            os << (i % 3 == 0 ? "{ " : "") << mat.data[i] << (i % 3 == 2 ? i == size - 1 ? " } " : " }, "  : ", ");
+        return os << "}";
     }
 };
 

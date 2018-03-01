@@ -251,13 +251,13 @@ TEST_CASE("Matrix") {
             7.f, 8.f, 9.f
         };
         Matrix b = {
-            3.f, 2.f, 1.f,
+            9.f, 8.f, 7.f,
             6.f, 5.f, 4.f,
-            9.f, 8.f, 7.f
+            3.f, 2.f, 1.f
         };
 
-        CHECK(a * b == Matrix({ 42.f, 36.f, 30.f, 96.f, 81.f, 66.f, 150.f, 126.f, 102.f }));
-        CHECK(b * a == Matrix({ 18.f, 24.f, 30.f, 54.f, 69.f, 84.f, 90.f, 114.f, 113.f }));
+        CHECK(a * b == Matrix({ 30.f, 24.f, 18.f, 84.f, 69.f, 54.f, 138.f, 114.f, 90.f }));
+        CHECK(b * a == Matrix({ 90.f, 114.f, 138.f, 54.f, 69.f, 84.f, 18.f, 24.f, 30.f }));
     }
 }
 
