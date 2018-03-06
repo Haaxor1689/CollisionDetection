@@ -5,25 +5,28 @@
 namespace MyEngine {
 
 // Helper row class
-template <typename T>
+template <typename T, size_t Width>
 class Row {
     T* data;
     size_t x;
 
+    template <size_t w>
     friend class Matrix;
     Row(T* data, size_t x) : data(data), x(x) {}
 public:
     // Index operators
-    T& operator[](size_t y) { return data[3 * y + x]; }
-    T operator[](size_t y) const { return data[3 * y + x]; }
+    T& operator[](size_t y) { return data[Width * y + x]; }
+    T operator[](size_t y) const { return data[Width * y + x]; }
 };
 
+template <size_t width>
 class Matrix {
-    using ConstRow = const Row<const float>;
-    using NormalRow = Row<float>;
+    // constexpr static size_t width = 3;
+    constexpr static size_t size = width * width;
 
-    constexpr static size_t size = 9;
-    constexpr static size_t width = 3;
+    using ConstRow = const Row<const float, width>;
+    using NormalRow = Row<float, width>;
+
     std::array<float, size> data;
 public:
     Matrix() = default;
@@ -32,6 +35,7 @@ public:
             data[i] = value;
         }
     }
+
     Matrix(const std::initializer_list<float>& list) : data() {
         if (list.size() != size)
             throw std::invalid_argument("Can't initialize with list of size " + std::to_string(list.size()) + ". Size must be " + std::to_string(size) + ".");
@@ -57,6 +61,7 @@ public:
             *lhsIt += *rhsIt;
         return lhs;
     }
+
     friend Matrix operator-(Matrix lhs, const Matrix& rhs) {
         auto lhsIt = lhs.data.begin();
         auto rhsIt = rhs.data.begin();
@@ -64,23 +69,33 @@ public:
             *lhsIt -= *rhsIt;
         return lhs;
     }
+
     friend Matrix operator*(const Matrix& lhs, const Matrix& rhs) {
         Matrix out;
         for (size_t j = 0; j < width; ++j)
             for (size_t i = 0; i < width; ++i) {
                 float sum = 0.f;
                 for (size_t k = 0; k < width; ++k)
-                    sum += rhs[k][j] * lhs[i][k];
+                    sum += lhs[k][j] * rhs[i][k];
                 out[i][j] = sum;
             }
         return out;
     }
+
     // Output stream operator
     friend std::ostream& operator<<(std::ostream& os, const Matrix& mat) {
         os << "{ ";
         for (size_t i = 0; i < size; ++i)
             os << (i % 3 == 0 ? "{ " : "") << mat.data[i] << (i % 3 == 2 ? i == size - 1 ? " } " : " }, "  : ", ");
         return os << "}";
+    }
+
+    static Matrix Identity() {
+        auto ret = Matrix();
+        for (size_t i = 0; i < width; ++i) {
+            ret[i][i] = 1.f;
+        }
+        return ret;
     }
 };
 

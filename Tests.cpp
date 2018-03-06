@@ -1,8 +1,12 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
-#include "MyEngine.hpp"
 #include <random>
+#include <type_traits>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+#include "MyEngine.hpp"
 
 std::random_device r;
 std::default_random_engine e(r());
@@ -13,6 +17,28 @@ float RandomFloat() {
 }
 
 using namespace MyEngine;
+
+#define GLMOperators(size) \
+bool operator==(const Matrix<size>& lhs, const glm::mat##size& rhs) { \
+    for (size_t j = 0; j < size; ++j) \
+        for (size_t i = 0; i < size; ++i) \
+            if (lhs[i][j] != rhs[i][j]) \
+                return false; \
+    return true; \
+} \
+bool operator!=(const Matrix<size>& lhs, const glm::mat##size& rhs) { return !(lhs == rhs); } \
+std::ostream& operator<<(std::ostream& os, const glm::mat##size& mat) { \
+    auto ptr = glm::value_ptr(mat); \
+    os << "{ "; \
+    for (size_t i = 0; i < size * size; ++i) { \
+        os << *ptr << ", "; \
+        ++ptr; \
+    } \
+    return os << " }"; \
+}
+GLMOperators(3)
+GLMOperators(4)
+
 
 TEST_CASE("Vector") {
     SECTION("Construction") {
@@ -178,52 +204,52 @@ TEST_CASE("Vector") {
 
 TEST_CASE("Matrix") {
     SECTION("Construction") {
-        auto cons = std::is_default_constructible_v<Matrix>;
+        auto cons = std::is_default_constructible_v<Matrix<3>>;
         REQUIRE(cons);
 
-        cons = std::is_constructible_v<Matrix, float>;
+        cons = std::is_constructible_v<Matrix<3>, float>;
         REQUIRE(cons);
 
-        cons = std::is_constructible_v<Matrix, std::initializer_list<float>>;
+        cons = std::is_constructible_v<Matrix<3>, std::initializer_list<float>>;
         REQUIRE(cons);
         
-        CHECK(Matrix() == std::initializer_list<float>{ 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f });
-        CHECK(Matrix(1.f) == std::initializer_list<float>{ 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f });
+        CHECK(Matrix<3>() == std::initializer_list<float>{ 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f });
+        CHECK(Matrix<3>(1.f) == std::initializer_list<float>{ 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f });
 
-        Matrix a = {
+        Matrix<3> a = {
             1.f, 2.f, 3.f,
             4.f, 5.f, 6.f,
             7.f, 8.f, 9.f
         };
         CHECK(a == std::initializer_list<float>{ 1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f });
 
-        Matrix b = a;
+        Matrix<3> b = a;
         CHECK(b == std::initializer_list<float>{ 1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f });
 
-        Matrix c(b);
+        Matrix<3> c(b);
         CHECK(c == std::initializer_list<float>{ 1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f });
 
-        CHECK_THROWS_WITH(Matrix({ 1.f, 1.f }), "Can't initialize with list of size 2. Size must be 9.");
-        CHECK_THROWS_WITH(Matrix({ 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f }), "Can't initialize with list of size 10. Size must be 9.");
+        CHECK_THROWS_WITH(Matrix<3>({ 1.f, 1.f }), "Can't initialize with list of size 2. Size must be 9.");
+        CHECK_THROWS_WITH(Matrix<3>({ 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f }), "Can't initialize with list of size 10. Size must be 9.");
     }
 
     SECTION("Matrix arithmetic operators") {
-        Matrix a = {
+        Matrix<3> a = {
             1.f, 2.f, 3.f,
             4.f, 5.f, 6.f,
             7.f, 8.f, 9.f
         };
         Matrix b = a + a;
-        CHECK(b == Matrix({ 2.f, 4.f, 6.f, 8.f, 10.f, 12.f, 14.f, 16.f, 18.f }));
-        CHECK(a == Matrix({ 1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f }));
+        CHECK(b == Matrix<3>({ 2.f, 4.f, 6.f, 8.f, 10.f, 12.f, 14.f, 16.f, 18.f }));
+        CHECK(a == Matrix<3>({ 1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f }));
 
         Matrix c = b - a;
         CHECK(c == a);
-        CHECK(b == Matrix({ 2.f, 4.f, 6.f, 8.f, 10.f, 12.f, 14.f, 16.f, 18.f }));
+        CHECK(b == Matrix<3>({ 2.f, 4.f, 6.f, 8.f, 10.f, 12.f, 14.f, 16.f, 18.f }));
     }
 
     SECTION("Index operator") {
-        Matrix a = {
+        Matrix<3> a = {
             1.f, 2.f, 3.f,
             4.f, 5.f, 6.f,
             7.f, 8.f, 9.f
@@ -245,19 +271,25 @@ TEST_CASE("Matrix") {
     }
 
     SECTION("Matrix multiplication") {
-        Matrix a = {
+        Matrix<3> a = {
             1.f, 2.f, 3.f,
             4.f, 5.f, 6.f,
             7.f, 8.f, 9.f
         };
-        Matrix b = {
+        Matrix<3> b = {
             9.f, 8.f, 7.f,
             6.f, 5.f, 4.f,
             3.f, 2.f, 1.f
         };
 
-        CHECK(a * b == Matrix({ 30.f, 24.f, 18.f, 84.f, 69.f, 54.f, 138.f, 114.f, 90.f }));
-        CHECK(b * a == Matrix({ 90.f, 114.f, 138.f, 54.f, 69.f, 84.f, 18.f, 24.f, 30.f }));
+        CHECK(a * b == Matrix<3>({ 30.f, 24.f, 18.f, 84.f, 69.f, 54.f, 138.f, 114.f, 90.f }));
+        CHECK(b * a == Matrix<3>({ 90.f, 114.f, 138.f, 54.f, 69.f, 84.f, 18.f, 24.f, 30.f }));
+    }
+
+    SECTION("Identity matrix") {
+        CHECK(Matrix<3>::Identity() == glm::mat3(1.f));
+        CHECK(Matrix<4>() == glm::mat4(1.f));
+        std::cout << glm::perspective(glm::radians(45.0f), 16.f / 9.f, 0.01f, 100.0f) << std::endl;
     }
 }
 
