@@ -34,11 +34,12 @@ std::ostream& operator<<(std::ostream& os, const glm::mat##size& mat) { \
         os << *ptr << ", "; \
         ++ptr; \
     } \
-    return os << " }"; \
+    return os << "}"; \
 }
+
+GLMOperators(2)
 GLMOperators(3)
 GLMOperators(4)
-
 
 TEST_CASE("Vector") {
     SECTION("Construction") {
@@ -239,6 +240,7 @@ TEST_CASE("Matrix") {
             4.f, 5.f, 6.f,
             7.f, 8.f, 9.f
         };
+
         Matrix b = a + a;
         CHECK(b == Matrix<3>({ 2.f, 4.f, 6.f, 8.f, 10.f, 12.f, 14.f, 16.f, 18.f }));
         CHECK(a == Matrix<3>({ 1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f }));
@@ -288,8 +290,137 @@ TEST_CASE("Matrix") {
 
     SECTION("Identity matrix") {
         CHECK(Matrix<3>::Identity() == glm::mat3(1.f));
-        CHECK(Matrix<4>() == glm::mat4(1.f));
-        std::cout << glm::perspective(glm::radians(45.0f), 16.f / 9.f, 0.01f, 100.0f) << std::endl;
+        CHECK(Matrix<4>::Identity() == glm::mat4(1.f));
+    }
+
+    SECTION("Transposed matrix") {
+        Matrix<3> a = {
+            1.f, 2.f, 3.f,
+            4.f, 5.f, 6.f,
+            7.f, 8.f, 9.f
+        };
+        Matrix<3> b = {
+            1.f, 4.f, 7.f,
+            2.f, 5.f, 8.f,
+            3.f, 6.f, 9.f
+        };
+
+        CHECK(a.Transpose() == b);
+    }
+
+    SECTION("Minor matrix") {
+        Matrix<4> a = {
+            1.f, 2.f, 3.f, 4.f,
+            5.f, 6.f, 7.f, 8.f,
+            9.f, 10.f, 11.f, 12.f,
+            13.f, 14.f, 15.f, 16.f
+        };
+        Matrix<3> b = {
+            5.f, 6.f, 8.f,
+            9.f, 10.f, 12.f,
+            13.f, 14.f, 16.f
+        };
+        Matrix<2> c = {
+            5.f, 6.f,
+            9.f, 10.f
+        };
+
+        CHECK(a.Minor(0, 2) == b);
+        CHECK(b.Minor(2, 2) == c);
+    }
+
+    SECTION("Matrix determinant") {
+        Matrix<2> a = {
+            1.f, 2.f,
+            3.f, 4.f
+        };
+        CHECK(a.Determinant() == -2.f);
+
+        Matrix<3> b = {
+            1.f, 2.f, 3.f,
+            3.f, 2.f, 1.f,
+            1.f, 3.f, 2.f
+        };
+        CHECK(b.Determinant() == 12.f);
+
+        Matrix<4> c = {
+            1.f, 2.f, 3.f, 1.f,
+            3.f, 4.f, 5.f, 2.f,
+            2.f, 5.f, 4.f, 3.f,
+            1.f, 3.f, 2.f, 1.f
+        };
+        CHECK(c.Determinant() == -7.f);
+    }
+
+    SECTION("Matrix of minors") {
+        Matrix<3> a = {
+            3.f, 0.f, 2.f,
+            2.f, 0.f, -2.f,
+            0.f, 1.f, 1.f
+        };
+        Matrix<3> b = {
+            2.f, 2.f, 2.f,
+            -2.f, 3.f, 3.f,
+            0.f, -10.f, 0.f
+        };
+
+        CHECK(Matrix<3>::Minors(a) == b);
+    }
+
+    SECTION("Matrix of cofactors") {
+        Matrix<3> a = {
+            1.f, 2.f, 3.f,
+            4.f, 5.f, 6.f,
+            7.f, 8.f, 9.f
+        };
+        Matrix<3> b = {
+            1.f, -2.f, 3.f,
+            -4.f, 5.f, -6.f,
+            7.f, -8.f, 9.f
+        };
+        CHECK(a.Cofactor() == b);
+
+        Matrix<4> c = {
+            1.f, 2.f, 3.f, 1.f,
+            3.f, 4.f, 5.f, 2.f,
+            2.f, 5.f, 4.f, 3.f,
+            1.f, 3.f, 2.f, 1.f
+        };
+        Matrix<4> d = {
+            1.f, -2.f, 3.f, -1.f,
+            -3.f, 4.f, -5.f, 2.f,
+            2.f, -5.f, 4.f, -3.f,
+            -1.f, 3.f, -2.f, 1.f
+        };
+        CHECK(c.Cofactor() == d);
+    }
+
+    SECTION("Matrix inverse") {
+        Matrix<3> a = {
+            3.f, 0.f, 2.f,
+            2.f, 0.f, -2.f,
+            0.f, 1.f, 1.f
+        };
+        Matrix<3> b = {
+            .2f, .2f, 0.f,
+            -.2f, .3f, 1.f,
+            .2f, -.3f, 0.f
+        };
+        CHECK(a.Invert() == b);
+
+        Matrix<4> c = {
+            1.f, 2.f, 3.f, 1.f,
+            3.f, 4.f, 5.f, 2.f,
+            2.f, 5.f, 4.f, 3.f,
+            1.f, 3.f, 2.f, 1.f
+        };
+        Matrix<4> d = {
+            -1.14285714285714f, 0.857142857142857f, -0.142857142857143f, -0.142857142857143f,
+            -0.142857142857143f, -0.142857142857143f, -0.142857142857143f, 0.857142857142857f, 
+            0.857142857142857f, -0.142857142857143f, -0.142857142857143f, -0.142857142857143f, 
+            -0.142857142857143f, -0.142857142857143f, 0.857142857142857f, -1.14285714285714f 
+        };
+        CHECK(c.Invert() == d);
     }
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <ostream>
 
 namespace MyEngine {
 
@@ -21,7 +22,7 @@ public:
 
 template <size_t width>
 class Matrix {
-    // constexpr static size_t width = 3;
+    static_assert(width >= 2, "Matrix of size lesser than 2 is not supported.");
     constexpr static size_t size = width * width;
 
     using ConstRow = const Row<const float, width>;
@@ -45,6 +46,48 @@ public:
             *j = i;
             ++j;
         }
+    }
+
+    int Determinant() const {
+        float det = 0;
+        for (size_t i = 0; i < width; ++i)
+            det += (i % 2 == 0 ? 1 : -1) * data[i] * Minor(0, i).Determinant();
+        return det;
+    }
+
+    Matrix<width - 1> Minor(size_t row, size_t column) const {
+        Matrix<width - 1> minor;
+        for (size_t j = 0, l = 0; j < width; ++j) {
+            if (j == row)
+                continue;
+            for (size_t i = 0, k = 0; i < width; ++i) {
+                if (i == column)
+                    continue;
+                minor[k][l] = (*this)[i][j];
+                ++k;
+            }
+            ++l;
+        }
+        return minor;
+    }
+
+    Matrix& Transpose() {
+        for (size_t j = 1; j < width; ++j)
+            for (size_t i = 0; i < j; ++i)
+                std::swap((*this)[i][j], (*this)[j][i]);
+        return *this;
+    }
+
+    Matrix& Cofactor() {
+        for (size_t j = 0; j < width; ++j)
+            for (size_t i = 0; i < width; ++i)
+                if (i % 2 != j % 2)
+                    (*this)[i][j] *= -1; 
+        return *this;
+    }
+
+    Matrix& Invert() {
+        return *this = Matrix::Minors(*this).Cofactor().Transpose() / Determinant();
     }
 
     // Index operators
@@ -82,14 +125,29 @@ public:
         return out;
     }
 
+    friend Matrix operator*(Matrix matrix, float value) {
+        for (size_t j = 0; j < width; ++j)
+            for (size_t i = 0; i < width; ++i)
+                matrix[i][j] *= value;
+        return matrix;
+    }
+
+    friend Matrix operator/(Matrix matrix, float value) {
+        for (size_t j = 0; j < width; ++j)
+            for (size_t i = 0; i < width; ++i)
+                matrix[i][j] /= value;
+        return matrix;
+    }
+
     // Output stream operator
     friend std::ostream& operator<<(std::ostream& os, const Matrix& mat) {
         os << "{ ";
         for (size_t i = 0; i < size; ++i)
-            os << (i % 3 == 0 ? "{ " : "") << mat.data[i] << (i % 3 == 2 ? i == size - 1 ? " } " : " }, "  : ", ");
+            os << (i % width == 0 ? "{ " : "") << mat.data[i] << (i % width == width - 1 ? i == size - 1 ? " } " : " }, "  : ", ");
         return os << "}";
     }
 
+    // Static methods
     static Matrix Identity() {
         auto ret = Matrix();
         for (size_t i = 0; i < width; ++i) {
@@ -97,6 +155,31 @@ public:
         }
         return ret;
     }
+
+    static Matrix Transposed(Matrix mat) {
+        return mat.Transpose();
+    }
+
+    static Matrix Minors(const Matrix& matrix) {
+        Matrix minors;
+        for (size_t j = 0; j < width; ++j)
+            for (size_t i = 0; i < width; ++i)
+                minors[i][j] = matrix.Minor(j, i).Determinant();
+        return minors;
+    }
+
+    static Matrix Cofactors(Matrix matrix) {
+        return matrix.Cofactor();
+    }
+
+    static Matrix Inverted(Matrix matrix) {
+        return matrix.Invert();
+    }
 };
+
+template <>
+inline int Matrix<2>::Determinant() const {
+    return data[0] * data[3] - data[1] * data [2];
+}
 
 }
