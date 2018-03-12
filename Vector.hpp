@@ -59,12 +59,12 @@ public:
     }
 
     // Static methods
-    static Vector Normalized(const Vector& vec) {
-        return Vector(vec).Normalize();
+    static Vector Normalized(Vector vec) {
+        return vec.Normalize();
     }
 
-    static Vector Inverted(const Vector& vec) {
-        return Vector(vec).Invert();
+    static Vector Inverted(Vector vec) {
+        return vec.Invert();
     }
 
     static float Dot(const Vector& lhs, const Vector& rhs) {
