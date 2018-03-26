@@ -48,10 +48,15 @@ public:
         if (list.size() != size)
             throw std::invalid_argument("Can't initialize with list of size " + std::to_string(list.size()) + ". Size must be " + std::to_string(size) + ".");
 
-        auto j = data.begin();
-        for (auto i : list) {
-            *j = i;
-            ++j;
+        int i = 0;
+        int j = 0;
+        for (auto item : list) {
+            (*this)[i][j] = item;
+            ++i;
+            if (i >= Width) {
+                i = 0;
+                ++j;
+            }
         }
     }
 
@@ -201,9 +206,9 @@ inline Matrix<4> Matrix<4>::Perspective(float fov, float aspect, float near, flo
     Matrix ret(0.f);
     ret[0][0] = 1.f / aspect * S;
     ret[1][1] = S;
-    ret[2][3] = -1.f;
+    ret[3][2] = -1.f;
     ret[2][2] = -(far + near) / (far - near);
-    ret[3][2] = -(2.f * far * near) / (far - near);
+    ret[2][3] = -(2.f * far * near) / (far - near);
 
     return ret;
 }

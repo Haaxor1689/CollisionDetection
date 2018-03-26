@@ -90,16 +90,10 @@ void Application::render() {
     program->use();
 
     // Set cameras projection and view matrices and eye location
-    auto my_projection_matrix = Geometry::Matrix<4>::Perspective(45.0f, aspect_ratio, 0.1f, 100.0f);
-    cout << my_projection_matrix << std::endl;
-    glm::mat4 projection_matrix = glm::perspective(glm::radians(45.0f), aspect_ratio, 0.1f, 100.0f);
-    PrintPtr(&my_projection_matrix);
-    cout << projection_matrix << std::endl;
-    PrintPtr(glm::value_ptr(projection_matrix));
+    auto projection_matrix = Geometry::Matrix<4>::Perspective(45.0f, aspect_ratio, 0.1f, 100.0f);
     glm::mat4 view_matrix = glm::lookAt(camera.get_eye_position(), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-    // glUniformMatrix4fv(projection_matrix_loc, 1, GL_FALSE, &projection_matrix);
-    glUniformMatrix4fv(projection_matrix_loc, 1, GL_FALSE, glm::value_ptr(projection_matrix));
+    glUniformMatrix4fv(projection_matrix_loc, 1, GL_FALSE, &projection_matrix);
     glUniformMatrix4fv(view_matrix_loc, 1, GL_FALSE, glm::value_ptr(view_matrix));
     glUniform3fv(eye_position_loc, 1, glm::value_ptr(camera.get_eye_position()));
 
