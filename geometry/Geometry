@@ -1,5 +1,6 @@
 #pragma once
 
-#include "src/Vector.hpp"
 #include "src/Matrix.hpp"
 #include "src/Ray.hpp"
+#include "src/Utility.hpp"
+#include "src/Vector.hpp"

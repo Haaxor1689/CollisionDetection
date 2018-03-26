@@ -37,11 +37,11 @@ using namespace Geometry;
         return os << "}";                                                                         \
     }
 
-GLMOperators(2)
-    GLMOperators(3)
-        GLMOperators(4)
+GLMOperators(2);
+GLMOperators(3);
+GLMOperators(4);
 
-            TEST_CASE("Vector") {
+TEST_CASE("Vector") {
     SECTION("Construction") {
         auto cons = std::is_default_constructible_v<Vector>;
         REQUIRE(cons);
@@ -421,7 +421,18 @@ TEST_CASE("Matrix") {
         };
         CHECK(c.Invert() == d);
     }
+
+    SECTION("Perspective") {
+    }
 }
 
 TEST_CASE("Ray") {
+}
+
+TEST_CASE("Utility") {
+    SECTION("Radians") {
+        CHECK(Radians(10.f) == Approx(glm::radians(10.f)).epsilon(0.0001f));
+        float angle = 150.f;
+        CHECK(Radians(angle) == Approx(glm::radians(angle)).epsilon(0.0001f));
+    }
 }

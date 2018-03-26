@@ -5,7 +5,6 @@
 #include <stdexcept>
 
 namespace Geometry {
-
 class Vector {
 public:
     float x, y, z;
@@ -78,5 +77,4 @@ public:
         return { lhs.y * rhs.z - rhs.y * lhs.z, lhs.z * rhs.x - rhs.z * lhs.x, lhs.x * rhs.y - rhs.x * lhs.y };
     }
 };
-
 } // namespace Geometry
