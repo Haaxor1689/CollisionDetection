@@ -6,7 +6,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "Geometry"
+#include "geometry/Geometry"
 
 std::random_device r;
 std::default_random_engine e(r());
@@ -16,7 +16,7 @@ float RandomFloat() {
     return rrd(e);
 }
 
-using namespace MyEngine;
+using namespace Geometry;
 
 #define GLMOperators(size)                                                                        \
     bool operator==(const Matrix<size>& lhs, const glm::mat##size& rhs) {                         \

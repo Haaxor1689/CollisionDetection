@@ -4,7 +4,6 @@
 #include <memory>
 
 #include "Application.hpp"
-#include "MyEngine.hpp"
 
 // Callback function to be called when OpenGL emits an error
 void APIENTRY opengl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
