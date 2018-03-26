@@ -71,7 +71,7 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
   set(CMAKE_CXX_FLAGS "/std:c++14 /permissive- /W3 /EHsc")
 endif()
 
-# PV112 Framework
+# Framework
 set(FRAMEWORK_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/framework/include")
 set(FRAMEWORK_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/framework/src")
 add_library(framework

@@ -3,7 +3,7 @@
 #include <array>
 #include <ostream>
 
-namespace MyEngine {
+namespace Geometry {
 
 // Helper row class
 template <typename T, size_t Width>
@@ -13,7 +13,9 @@ class Row {
 
     template <size_t w>
     friend class Matrix;
-    Row(T* data, size_t x) : data(data), x(x) {}
+    Row(T* data, size_t x)
+        : data(data), x(x) {}
+
 public:
     // Index operators
     T& operator[](size_t y) { return data[Width * y + x]; }
@@ -29,15 +31,18 @@ class Matrix {
     using NormalRow = Row<float, width>;
 
     std::array<float, size> data;
+
 public:
     Matrix() = default;
-    Matrix(float value) : data() {
+    Matrix(float value)
+        : data() {
         for (size_t i = 0; i < size; ++i) {
             data[i] = value;
         }
     }
 
-    Matrix(const std::initializer_list<float>& list) : data() {
+    Matrix(const std::initializer_list<float>& list)
+        : data() {
         if (list.size() != size)
             throw std::invalid_argument("Can't initialize with list of size " + std::to_string(list.size()) + ". Size must be " + std::to_string(size) + ".");
 
@@ -82,7 +87,7 @@ public:
         for (size_t j = 0; j < width; ++j)
             for (size_t i = 0; i < width; ++i)
                 if (i % 2 != j % 2)
-                    (*this)[i][j] *= -1; 
+                    (*this)[i][j] *= -1;
         return *this;
     }
 
@@ -143,7 +148,7 @@ public:
     friend std::ostream& operator<<(std::ostream& os, const Matrix& mat) {
         os << "{ ";
         for (size_t i = 0; i < size; ++i)
-            os << (i % width == 0 ? "{ " : "") << mat.data[i] << (i % width == width - 1 ? i == size - 1 ? " } " : " }, "  : ", ");
+            os << (i % width == 0 ? "{ " : "") << mat.data[i] << (i % width == width - 1 ? i == size - 1 ? " } " : " }, " : ", ");
         return os << "}";
     }
 
@@ -179,7 +184,7 @@ public:
 
 template <>
 inline int Matrix<2>::Determinant() const {
-    return data[0] * data[3] - data[1] * data [2];
+    return data[0] * data[3] - data[1] * data[2];
 }
 
-}
+} // namespace Geometry

@@ -1,9 +1,8 @@
 #pragma once
 
-namespace MyEngine {
+namespace Geometry {
 
 class Ray {
-    
 };
 
-}
+} // namespace Geometry

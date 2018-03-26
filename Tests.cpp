@@ -6,11 +6,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "MyEngine.hpp"
+#include "Geometry"
 
 std::random_device r;
 std::default_random_engine e(r());
-std::uniform_real_distribution< float > rrd(-100, 100);
+std::uniform_real_distribution<float> rrd(-100, 100);
 
 float RandomFloat() {
     return rrd(e);
@@ -18,30 +18,30 @@ float RandomFloat() {
 
 using namespace MyEngine;
 
-#define GLMOperators(size) \
-bool operator==(const Matrix<size>& lhs, const glm::mat##size& rhs) { \
-    for (size_t j = 0; j < size; ++j) \
-        for (size_t i = 0; i < size; ++i) \
-            if (lhs[i][j] != rhs[i][j]) \
-                return false; \
-    return true; \
-} \
-bool operator!=(const Matrix<size>& lhs, const glm::mat##size& rhs) { return !(lhs == rhs); } \
-std::ostream& operator<<(std::ostream& os, const glm::mat##size& mat) { \
-    auto ptr = glm::value_ptr(mat); \
-    os << "{ "; \
-    for (size_t i = 0; i < size * size; ++i) { \
-        os << *ptr << ", "; \
-        ++ptr; \
-    } \
-    return os << "}"; \
-}
+#define GLMOperators(size)                                                                        \
+    bool operator==(const Matrix<size>& lhs, const glm::mat##size& rhs) {                         \
+        for (size_t j = 0; j < size; ++j)                                                         \
+            for (size_t i = 0; i < size; ++i)                                                     \
+                if (lhs[i][j] != rhs[i][j])                                                       \
+                    return false;                                                                 \
+        return true;                                                                              \
+    }                                                                                             \
+    bool operator!=(const Matrix<size>& lhs, const glm::mat##size& rhs) { return !(lhs == rhs); } \
+    std::ostream& operator<<(std::ostream& os, const glm::mat##size& mat) {                       \
+        auto ptr = glm::value_ptr(mat);                                                           \
+        os << "{ ";                                                                               \
+        for (size_t i = 0; i < size * size; ++i) {                                                \
+            os << *ptr << ", ";                                                                   \
+            ++ptr;                                                                                \
+        }                                                                                         \
+        return os << "}";                                                                         \
+    }
 
 GLMOperators(2)
-GLMOperators(3)
-GLMOperators(4)
+    GLMOperators(3)
+        GLMOperators(4)
 
-TEST_CASE("Vector") {
+            TEST_CASE("Vector") {
     SECTION("Construction") {
         auto cons = std::is_default_constructible_v<Vector>;
         REQUIRE(cons);
@@ -56,8 +56,8 @@ TEST_CASE("Vector") {
         CHECK(a.x == 0.f);
         CHECK(a.y == 0.f);
         CHECK(a.z == 0.f);
-        
-        Vector b(1.f, 2.f ,3.f);
+
+        Vector b(1.f, 2.f, 3.f);
         CHECK(b.x == 1.f);
         CHECK(b.y == 2.f);
         CHECK(b.z == 3.f);
@@ -69,7 +69,7 @@ TEST_CASE("Vector") {
     }
 
     SECTION("Copy ctor") {
-        Vector a(1.f, 2.f ,3.f);
+        Vector a(1.f, 2.f, 3.f);
         Vector b(a);
         CHECK(b.x == 1.f);
         CHECK(b.y == 2.f);
@@ -118,7 +118,7 @@ TEST_CASE("Vector") {
             float x = RandomFloat();
             float y = RandomFloat();
             float z = RandomFloat();
-            CHECK(Vector(x, y ,z).Magnitude() == mag(x, y, z));
+            CHECK(Vector(x, y, z).Magnitude() == mag(x, y, z));
         }
     }
 
@@ -140,7 +140,7 @@ TEST_CASE("Vector") {
             float x = RandomFloat();
             float y = RandomFloat();
             float z = RandomFloat();
-            CHECK(Vector(x, y ,z).Normalize() == norm(x, y, z));
+            CHECK(Vector(x, y, z).Normalize() == norm(x, y, z));
         }
     }
 
@@ -151,7 +151,6 @@ TEST_CASE("Vector") {
         Vector b(-1.f, -2.f, -3.f);
         CHECK(a.Invert() == b);
 
-
         auto inv = [](float x, float y, float z) {
             return Vector(-x, -y, -z);
         };
@@ -160,7 +159,7 @@ TEST_CASE("Vector") {
             float x = RandomFloat();
             float y = RandomFloat();
             float z = RandomFloat();
-            CHECK(Vector(x, y ,z).Invert() == inv(x, y, z));
+            CHECK(Vector(x, y, z).Invert() == inv(x, y, z));
         }
     }
 
@@ -169,7 +168,7 @@ TEST_CASE("Vector") {
         CHECK(Vector::Dot(Vector(1.f), Vector(1.f)) == 3.f);
 
         auto dot = [](const Vector& lhs, const Vector& rhs) {
-            return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z; 
+            return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
         };
 
         for (unsigned i = 0; i < 100; ++i) {
@@ -179,7 +178,7 @@ TEST_CASE("Vector") {
             float p = RandomFloat();
             float q = RandomFloat();
             float r = RandomFloat();
-            CHECK(Vector::Dot({ x, y, z }, { p, q, r })== dot({ x, y, z }, { p, q, r }));
+            CHECK(Vector::Dot({ x, y, z }, { p, q, r }) == dot({ x, y, z }, { p, q, r }));
         }
     }
 
@@ -188,7 +187,7 @@ TEST_CASE("Vector") {
         CHECK(Vector::Cross({ 1.f, 0.f, 0.f }, { 0.f, 1.f, 0.f }) == Vector(0.f, 0.f, 1.f));
 
         auto cross = [](const Vector& lhs, const Vector& rhs) {
-            return Vector(lhs.y * rhs.z - rhs.y * lhs.z, lhs.z * rhs.x - rhs.z * lhs.x, lhs.x * rhs.y - rhs.x * lhs.y );
+            return Vector(lhs.y * rhs.z - rhs.y * lhs.z, lhs.z * rhs.x - rhs.z * lhs.x, lhs.x * rhs.y - rhs.x * lhs.y);
         };
 
         for (unsigned i = 0; i < 100; ++i) {
@@ -198,7 +197,7 @@ TEST_CASE("Vector") {
             float p = RandomFloat();
             float q = RandomFloat();
             float r = RandomFloat();
-            CHECK(Vector::Cross({ x, y, z }, { p, q, r })== cross({ x, y, z }, { p, q, r }));
+            CHECK(Vector::Cross({ x, y, z }, { p, q, r }) == cross({ x, y, z }, { p, q, r }));
         }
     }
 }
@@ -213,7 +212,7 @@ TEST_CASE("Matrix") {
 
         cons = std::is_constructible_v<Matrix<3>, std::initializer_list<float>>;
         REQUIRE(cons);
-        
+
         CHECK(Matrix<3>() == std::initializer_list<float>{ 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f });
         CHECK(Matrix<3>(1.f) == std::initializer_list<float>{ 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f });
 
@@ -416,14 +415,13 @@ TEST_CASE("Matrix") {
         };
         Matrix<4> d = {
             -1.14285714285714f, 0.857142857142857f, -0.142857142857143f, -0.142857142857143f,
-            -0.142857142857143f, -0.142857142857143f, -0.142857142857143f, 0.857142857142857f, 
-            0.857142857142857f, -0.142857142857143f, -0.142857142857143f, -0.142857142857143f, 
-            -0.142857142857143f, -0.142857142857143f, 0.857142857142857f, -1.14285714285714f 
+            -0.142857142857143f, -0.142857142857143f, -0.142857142857143f, 0.857142857142857f,
+            0.857142857142857f, -0.142857142857143f, -0.142857142857143f, -0.142857142857143f,
+            -0.142857142857143f, -0.142857142857143f, 0.857142857142857f, -1.14285714285714f
         };
         CHECK(c.Invert() == d);
     }
 }
 
 TEST_CASE("Ray") {
-
 }
