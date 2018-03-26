@@ -4,7 +4,7 @@
 
 const int sphere_vertices_count = 325;
 const float sphere_vertices[sphere_vertices_count * 8] = {
-    // clang-format off
+    /* clang-format off */
 	// Positions (3f), Normals (3f), Tex Coords (2f)
 	-0.000000f, -1.000000f,  0.000000f,		-0.000000f, -1.000000f,  0.000000f,		 0.000000f,  0.000000f,
 	0.000000f, -1.000000f,  0.000000f,		 0.000000f, -1.000000f,  0.000000f,		 0.041667f,  0.000000f,
@@ -331,12 +331,12 @@ const float sphere_vertices[sphere_vertices_count * 8] = {
 	-0.000000f,  1.000000f,  0.000000f,		-0.000000f,  1.000000f,  0.000000f,		 0.916667f,  1.000000f,
 	-0.000000f,  1.000000f,  0.000000f,		-0.000000f,  1.000000f,  0.000000f,		 0.958333f,  1.000000f,
 	0.000000f,  1.000000f,  0.000000f,		 0.000000f,  1.000000f,  0.000000f,		 1.000000f,  1.000000f,
-    // clang-format on
+    /* clang-format on */
 };
 
 const int sphere_indices_count = 622;
 const uint32_t sphere_indices[sphere_indices_count] = {
-    // clang-format off
+    /* clang-format off */
 	// Triangle strip
 	25,   0,  26,   1,  27,   2,  28,   3,  29,   4,  30,   5,  31,   6,  32,   7,  33,   8,  34,   9,
 	35,  10,  36,  11,  37,  12,  38,  13,  39,  14,  40,  15,  41,  16,  42,  17,  43,  18,  44,  19,
@@ -370,5 +370,5 @@ const uint32_t sphere_indices[sphere_indices_count] = {
 	304, 279, 305, 280, 306, 281, 307, 282, 308, 283, 309, 284, 310, 285, 311, 286, 312, 287, 313, 288,
 	314, 289, 315, 290, 316, 291, 317, 292, 318, 293, 319, 294, 320, 295, 321, 296, 322, 297, 323, 298,
 	324, 299,
-    // clang-format on
+    /* clang-format on */
 };
