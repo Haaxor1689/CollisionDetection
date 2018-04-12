@@ -2,7 +2,7 @@
 
 Window::Window(int initial_width, int initial_height, const std::string& title)
     : width(initial_width), height(initial_height) {
-    // Beforce creating the Window, request OpenGL 3.3 Core context
+    // Before creating the Window, request OpenGL 3.3 Core context
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);

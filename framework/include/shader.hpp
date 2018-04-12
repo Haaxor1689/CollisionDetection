@@ -4,8 +4,10 @@
 
 #include <string>
 
-enum class ShaderCompilationStatus { Success,
-                                     Failure };
+enum class ShaderCompilationStatus {
+    Success,
+    Failure
+};
 
 class Shader {
 public:

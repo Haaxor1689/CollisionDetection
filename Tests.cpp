@@ -5,16 +5,9 @@
 #include <type_traits>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/rotate_vector.hpp>
 
-#include "geometry/Geometry"
-
-std::random_device r;
-std::default_random_engine e(r());
-std::uniform_real_distribution<float> rrd(-100, 100);
-
-float RandomFloat() {
-    return rrd(e);
-}
+#include "Geometry"
 
 using namespace Geometry;
 
@@ -37,9 +30,29 @@ using namespace Geometry;
         return os << "}";                                                                         \
     }
 
+namespace {
+std::random_device r;
+std::default_random_engine e(r());
+std::uniform_real_distribution<float> rrd(-100, 100);
+
+float RandomFloat() {
+    return rrd(e);
+}
+
+Vector ToVector(const glm::vec3& vec) {
+    return { vec.x, vec.y, vec.z };
+}
+
+void CHECK_APPROX(const Vector& lhs, const Vector& rhs) {
+    CHECK(lhs.x() == Approx(rhs.x()).epsilon(0.0001f));
+    CHECK(lhs.y() == Approx(rhs.y()).epsilon(0.0001f));
+    CHECK(lhs.z() == Approx(rhs.z()).epsilon(0.0001f));
+}
+
 GLMOperators(2);
 GLMOperators(3);
 GLMOperators(4);
+} // namespace
 
 TEST_CASE("Vector") {
     SECTION("Construction") {
@@ -53,44 +66,44 @@ TEST_CASE("Vector") {
         REQUIRE(cons);
 
         Vector a;
-        CHECK(a.x == 0.f);
-        CHECK(a.y == 0.f);
-        CHECK(a.z == 0.f);
+        CHECK(a.x() == 0.f);
+        CHECK(a.y() == 0.f);
+        CHECK(a.z() == 0.f);
 
         Vector b(1.f, 2.f, 3.f);
-        CHECK(b.x == 1.f);
-        CHECK(b.y == 2.f);
-        CHECK(b.z == 3.f);
+        CHECK(b.x() == 1.f);
+        CHECK(b.y() == 2.f);
+        CHECK(b.z() == 3.f);
 
         Vector c(2.f);
-        CHECK(c.x == 2.f);
-        CHECK(c.y == 2.f);
-        CHECK(c.z == 2.f);
+        CHECK(c.x() == 2.f);
+        CHECK(c.y() == 2.f);
+        CHECK(c.z() == 2.f);
     }
 
     SECTION("Copy ctor") {
         Vector a(1.f, 2.f, 3.f);
         Vector b(a);
-        CHECK(b.x == 1.f);
-        CHECK(b.y == 2.f);
-        CHECK(b.z == 3.f);
+        CHECK(b.x() == 1.f);
+        CHECK(b.y() == 2.f);
+        CHECK(b.z() == 3.f);
         Vector c(Vector(4.f, 5.f, 6.f));
-        CHECK(c.x == 4.f);
-        CHECK(c.y == 5.f);
-        CHECK(c.z == 6.f);
+        CHECK(c.x() == 4.f);
+        CHECK(c.y() == 5.f);
+        CHECK(c.z() == 6.f);
     }
 
     SECTION("Copy assignment") {
         Vector a(1.f, 2.f, 3.f);
         Vector b(4.f, 5.f, 6.f);
         b = a;
-        CHECK(b.x == 1.f);
-        CHECK(b.y == 2.f);
-        CHECK(b.z == 3.f);
+        CHECK(b.x() == 1.f);
+        CHECK(b.y() == 2.f);
+        CHECK(b.z() == 3.f);
         b = Vector(7.f, 8.f, 9.f);
-        CHECK(b.x == 7.f);
-        CHECK(b.y == 8.f);
-        CHECK(b.z == 9.f);
+        CHECK(b.x() == 7.f);
+        CHECK(b.y() == 8.f);
+        CHECK(b.z() == 9.f);
     }
 
     SECTION("Vector arithmetic operators") {
@@ -168,7 +181,7 @@ TEST_CASE("Vector") {
         CHECK(Vector::Dot(Vector(1.f), Vector(1.f)) == 3.f);
 
         auto dot = [](const Vector& lhs, const Vector& rhs) {
-            return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
+            return lhs.x() * rhs.x() + lhs.y() * rhs.y() + lhs.z() * rhs.z();
         };
 
         for (unsigned i = 0; i < 100; ++i) {
@@ -187,7 +200,7 @@ TEST_CASE("Vector") {
         CHECK(Vector::Cross({ 1.f, 0.f, 0.f }, { 0.f, 1.f, 0.f }) == Vector(0.f, 0.f, 1.f));
 
         auto cross = [](const Vector& lhs, const Vector& rhs) {
-            return Vector(lhs.y * rhs.z - rhs.y * lhs.z, lhs.z * rhs.x - rhs.z * lhs.x, lhs.x * rhs.y - rhs.x * lhs.y);
+            return Vector(lhs.y() * rhs.z() - rhs.y() * lhs.z(), lhs.z() * rhs.x() - rhs.z() * lhs.x(), lhs.x() * rhs.y() - rhs.x() * lhs.y());
         };
 
         for (unsigned i = 0; i < 100; ++i) {
@@ -198,6 +211,33 @@ TEST_CASE("Vector") {
             float q = RandomFloat();
             float r = RandomFloat();
             CHECK(Vector::Cross({ x, y, z }, { p, q, r }) == cross({ x, y, z }, { p, q, r }));
+        }
+    }
+
+    SECTION("Matrix multiplication") {
+        Vector vec = { 1.f, 2.f, 3.f };
+        Matrix<3> mat = {
+            1.f, 2.f, 3.f,
+            4.f, 5.f, 6.f,
+            7.f, 8.f, 9.f
+        };
+
+        Vector expected = { 14.f, 32.f, 50.f };
+        CHECK(vec * mat == expected);
+    }
+
+    SECTION("Translation, rotation and scaling") {
+        for (unsigned i = 0; i < 100; ++i) {
+            float x = RandomFloat();
+            float y = RandomFloat();
+            float z = RandomFloat();
+            float p = RandomFloat();
+            float q = RandomFloat();
+            float r = RandomFloat();
+            float angle = RandomFloat();
+            CHECK(Vector{ x, y, z }.Translate({ p, q, r }) == Vector{ x, y, z } + Vector{ p, q, r });
+            CHECK_APPROX(Vector{ x, y, z }.Rotate(angle, { p, q, r }), ToVector(glm::rotate(glm::vec3(x, y, z), angle, glm::vec3(p, q, r))));
+            CHECK(Vector{ x, y, z }.Scale({ p, q, r }) == Vector{ x, y, z } * Vector{ p, q, r });
         }
     }
 }
@@ -240,11 +280,11 @@ TEST_CASE("Matrix") {
             7.f, 8.f, 9.f
         };
 
-        Matrix b = a + a;
+        Matrix<3> b = a + a;
         CHECK(b == Matrix<3>({ 2.f, 4.f, 6.f, 8.f, 10.f, 12.f, 14.f, 16.f, 18.f }));
         CHECK(a == Matrix<3>({ 1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f }));
 
-        Matrix c = b - a;
+        Matrix<3> c = b - a;
         CHECK(c == a);
         CHECK(b == Matrix<3>({ 2.f, 4.f, 6.f, 8.f, 10.f, 12.f, 14.f, 16.f, 18.f }));
     }

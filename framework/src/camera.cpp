@@ -15,9 +15,9 @@ Camera::Camera()
 }
 
 void Camera::update_eye_pos() {
-    eye_position.x = distance * cosf(angle_elevation) * -sinf(angle_direction);
-    eye_position.y = distance * sinf(angle_elevation);
-    eye_position.z = distance * cosf(angle_elevation) * cosf(angle_direction);
+    eye_position.x() = distance * cosf(angle_elevation) * -sinf(angle_direction);
+    eye_position.y() = distance * sinf(angle_elevation);
+    eye_position.z() = distance * cosf(angle_elevation) * cosf(angle_direction);
 }
 
 void Camera::on_mouse_button(int button, int action, int mods) {
@@ -65,6 +65,6 @@ void Camera::on_mouse_move(double x, double y) {
     update_eye_pos();
 }
 
-glm::vec3 Camera::get_eye_position() const {
+Geometry::Vector Camera::get_eye_position() const {
     return eye_position;
 }

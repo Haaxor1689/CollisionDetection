@@ -1,33 +1,29 @@
 #include "Application.hpp"
 
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/rotate_vector.hpp>
-
 #include <iostream>
 
-#include "geometry/Geometry"
+#include "Geometry"
 
 using namespace std;
 
 namespace {
-void PrintPtr(const float* matrix) {
-    cout << "{ ";
-    for (int i = 0; i < 16; ++i) {
-        cout << *matrix << ", ";
-        ++matrix;
-    }
-    cout << "}" << std::endl;
-}
-std::ostream& operator<<(std::ostream& os, const glm::mat4& mat) {
-    auto ptr = glm::value_ptr(mat);
-    os << "{ ";
-    for (size_t i = 0; i < 16; ++i) {
-        os << *ptr << ", ";
-        ++ptr;
-    }
-    return os << "}";
-}
+// void PrintPtr(const float* matrix) {
+//     cout << "{ ";
+//     for (int i = 0; i < 16; ++i) {
+//         cout << *matrix << ", ";
+//         ++matrix;
+//     }
+//     cout << "}" << std::endl;
+// }
+// std::ostream& operator<<(std::ostream& os, const glm::mat4& mat) {
+//     auto ptr = glm::value_ptr(mat);
+//     os << "{ ";
+//     for (size_t i = 0; i < 16; ++i) {
+//         os << *ptr << ", ";
+//         ++ptr;
+//     }
+//     return os << "}";
+// }
 } // namespace
 
 void Application::init() {
@@ -90,18 +86,18 @@ void Application::render() {
     program->use();
 
     // Set cameras projection and view matrices and eye location
-    auto projection_matrix = Geometry::Matrix<4>::Perspective(45.0f, aspect_ratio, 0.1f, 100.0f);
-    glm::mat4 view_matrix = glm::lookAt(camera.get_eye_position(), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    auto projection_matrix = Geometry::Perspective(45.0f, aspect_ratio, 0.1f, 100.0f);
+    auto view_matrix = Geometry::LookAt(camera.get_eye_position(), { 0.0f }, { 0.0f, 1.0f, 0.0f });
 
     glUniformMatrix4fv(projection_matrix_loc, 1, GL_FALSE, &projection_matrix);
-    glUniformMatrix4fv(view_matrix_loc, 1, GL_FALSE, glm::value_ptr(view_matrix));
-    glUniform3fv(eye_position_loc, 1, glm::value_ptr(camera.get_eye_position()));
+    glUniformMatrix4fv(view_matrix_loc, 1, GL_FALSE, &view_matrix);
+    glUniform3fv(eye_position_loc, 1, &camera.get_eye_position());
 
     // Set light
-    glm::vec3 light_pos = glm::rotate(glm::vec3(0.f, std::sin(app_time * 2), 2.f), app_time, glm::vec3(0.f, 1.f, 0.f));
+    auto light_pos = Geometry::Vector(0.f, std::sin(app_time * 2), 2.f).Rotate(app_time, { 0.f, 1.f, 0.f });
     // Position
     // W = 0.0 for directional, W = 1.0 for point
-    glUniform4f(light_position_loc, light_pos.x, light_pos.y, light_pos.z, 1.0f);
+    glUniform4f(light_position_loc, light_pos.x(), light_pos.y(), light_pos.z(), 1.0f);
 
     // Colors
     glUniform3f(light_ambient_color_loc, 0.05f, 0.05f, 0.05f);
@@ -111,8 +107,8 @@ void Application::render() {
     sphere.bind_vao();
 
     // Model matrix
-    glm::mat4 model_matrix = glm::mat4(1.0f);
-    glUniformMatrix4fv(model_matrix_loc, 1, GL_FALSE, glm::value_ptr(model_matrix));
+    auto model_matrix = Geometry::Matrix<4>::Identity();
+    glUniformMatrix4fv(model_matrix_loc, 1, GL_FALSE, &model_matrix);
 
     // Materials
     glUniform3f(material_ambient_color_loc, 1.0f, 1.0f, 1.0f);

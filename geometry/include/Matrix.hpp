@@ -3,7 +3,6 @@
 #include <array>
 #include <ostream>
 
-#include "Utility.hpp"
 #include "Exceptions.hpp"
 
 namespace Geometry {
@@ -48,8 +47,8 @@ public:
         if (list.size() != size)
             throw std::invalid_argument("Can't initialize with list of size " + std::to_string(list.size()) + ". Size must be " + std::to_string(size) + ".");
 
-        int i = 0;
-        int j = 0;
+        unsigned i = 0;
+        unsigned j = 0;
         for (auto item : list) {
             (*this)[i][j] = item;
             ++i;
@@ -189,27 +188,10 @@ public:
     static Matrix Inverted(Matrix matrix) {
         return matrix.Invert();
     }
-
-    static Matrix Perspective(float fov, float aspect, float near, float far) {
-        throw DimensionsException<Width>("Matrix", "Perspective");
-    }
 };
 
 template <>
 inline int Matrix<2>::Determinant() const {
     return data[0] * data[3] - data[1] * data[2];
-}
-
-template <>
-inline Matrix<4> Matrix<4>::Perspective(float fov, float aspect, float near, float far) {
-    float S = 1.f / std::tan(Radians(fov) * 0.5f);
-    Matrix ret(0.f);
-    ret[0][0] = 1.f / aspect * S;
-    ret[1][1] = S;
-    ret[3][2] = -1.f;
-    ret[2][2] = -(far + near) / (far - near);
-    ret[2][3] = -(2.f * far * near) / (far - near);
-
-    return ret;
 }
 } // namespace Geometry

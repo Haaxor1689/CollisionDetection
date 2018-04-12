@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glm/glm.hpp>
+#include "Geometry"
 
 /// This is a VERY SIMPLE class that allows to very simply move with the camera.
 ///
@@ -38,9 +38,8 @@ private:
     /// Distance from (0,0,0), the point at which I look
     float distance;
 
-    /// Final position of the eye in world space coordinates, for LookAt or
-    /// shaders
-    glm::vec3 eye_position;
+    /// Final position of the eye in world space coordinates, for LookAt or shaders
+    Geometry::Vector eye_position;
 
     /// Last X and Y coordinates of the mouse cursor
     int last_x, last_y;
@@ -65,5 +64,5 @@ public:
     void on_mouse_move(double x, double y);
 
     /// Returns the position of the eye in world space coordinates
-    glm::vec3 get_eye_position() const;
+    Geometry::Vector get_eye_position() const;
 };

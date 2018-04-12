@@ -75,22 +75,17 @@ endif()
 set(FRAMEWORK_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/framework/include")
 set(FRAMEWORK_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/framework/src")
 add_library(framework
-        "${FRAMEWORK_INCLUDE_DIR}/window.hpp"
 	"${FRAMEWORK_SRC_DIR}/window.cpp"
-        "${FRAMEWORK_INCLUDE_DIR}/utility.hpp"
 	"${FRAMEWORK_SRC_DIR}/utility.cpp"
-        "${FRAMEWORK_INCLUDE_DIR}/shader.hpp"
 	"${FRAMEWORK_SRC_DIR}/shader.cpp"
-        "${FRAMEWORK_INCLUDE_DIR}/program.hpp"
 	"${FRAMEWORK_SRC_DIR}/program.cpp"
-        "${FRAMEWORK_INCLUDE_DIR}/mesh.hpp"
 	"${FRAMEWORK_SRC_DIR}/mesh.cpp"
-        "${FRAMEWORK_INCLUDE_DIR}/camera.hpp"
         "${FRAMEWORK_SRC_DIR}/camera.cpp"
-        "${FRAMEWORK_INCLUDE_DIR}/texture.hpp"
         "${FRAMEWORK_SRC_DIR}/texture.cpp"
 )
 add_dependencies(framework glfw glad)
+
+set(GEOMETRY_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/geometry")
 
 target_link_libraries(framework ${GLFW_LIBRARIES} ${GLAD_LIBRARIES})
 target_include_directories(framework 
@@ -98,6 +93,7 @@ target_include_directories(framework
         PRIVATE ${GLAD_INCLUDE_DIR}
 	PRIVATE ${FRAMEWORK_INCLUDE_DIR}
 	PRIVATE ${SINGLE_HEADER_LIBS_INCLUDE_DIR}
+        PRIVATE ${GEOMETRY_INCLUDE_DIR}
         PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/objects"
 )
 
@@ -109,6 +105,7 @@ target_include_directories(Main
         PRIVATE ${GLAD_INCLUDE_DIR}
         PRIVATE ${SINGLE_HEADER_LIBS_INCLUDE_DIR}
         PRIVATE ${FRAMEWORK_INCLUDE_DIR}
+        PRIVATE ${GEOMETRY_INCLUDE_DIR}
 )
 
 # Tests
@@ -119,4 +116,5 @@ target_include_directories(Test
         PRIVATE ${GLAD_INCLUDE_DIR}
         PRIVATE ${SINGLE_HEADER_LIBS_INCLUDE_DIR}
         PRIVATE ${FRAMEWORK_INCLUDE_DIR}
+        PRIVATE ${GEOMETRY_INCLUDE_DIR}
 )

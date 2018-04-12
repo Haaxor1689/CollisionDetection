@@ -1,6 +1,6 @@
 #pragma once
 
-#include "src/Matrix.hpp"
-#include "src/Ray.hpp"
-#include "src/Utility.hpp"
-#include "src/Vector.hpp"
+#include "include/Vector.hpp"
+#include "include/Matrix.hpp"
+#include "include/Ray.hpp"
+#include "include/Utility.hpp"
