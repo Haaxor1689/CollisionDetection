@@ -42,7 +42,9 @@ public:
 
     static Mesh cube(GLint position_location = -1, GLint normal_location = -1, GLint tex_coord_location = -1);
     static Mesh sphere(GLint position_location = -1, GLint normal_location = -1, GLint tex_coord_location = -1);
-    static Mesh teapot(GLint position_location = -1, GLint normal_location = -1, GLint tex_coord_location = -1);
+    static Mesh ground(GLint position_location = -1, GLint normal_location = -1, GLint tex_coord_location = -1);
+    static Mesh pad(GLint position_location = -1, GLint normal_location = -1, GLint tex_coord_location = -1);
+    static Mesh brick(GLint position_location = -1, GLint normal_location = -1, GLint tex_coord_location = -1);
 
     ~Mesh();
 

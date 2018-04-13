@@ -60,11 +60,17 @@ private:
 
     GLint eye_position_loc = -1;
 
-    GLuint texture_01 = 0;
+    GLuint t_bricks = 0;
+    GLuint t_glass = 0;
+    GLuint t_rune = 0;
+    GLuint t_roof = 0;
+    GLuint t_wood = 0;
 
     Mesh cube = Mesh::cube();
     Mesh sphere = Mesh::sphere();
-    Mesh teapot = Mesh::teapot();
+    Mesh ground = Mesh::ground();
+    Mesh pad = Mesh::pad();
+    Mesh brick = Mesh::brick();
 
     static void on_key(GLFWwindow* window, int key, int scancode, int actions, int mods) {
         Application* this_pointer = static_cast<Application*>(glfwGetWindowUserPointer(window));

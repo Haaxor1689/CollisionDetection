@@ -30,6 +30,8 @@ void Application::init() {
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClearDepth(1.0);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    // glFrontFace(GL_CW);
 
     // Create shader program
     program = make_unique<ShaderProgram>("shaders/main.vert", "shaders/main.frag");
@@ -59,15 +61,25 @@ void Application::init() {
 
     cube.create_vao(position_loc, normal_loc, tex_coord_loc);
     sphere.create_vao(position_loc, normal_loc, tex_coord_loc);
-    teapot.create_vao(position_loc, normal_loc, tex_coord_loc);
+    ground.create_vao(position_loc, normal_loc, tex_coord_loc);
+    pad.create_vao(position_loc, normal_loc, tex_coord_loc);
+    brick.create_vao(position_loc, normal_loc, tex_coord_loc);
 
-    texture_01 = load_texture_2d("images/rocks.png");
-    glBindTexture(GL_TEXTURE_2D, texture_01);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    auto load_and_set_texture = [](const std::string& name, GLuint& pos) {
+        pos = load_texture_2d("images/" + name + ".png");
+        glBindTexture(GL_TEXTURE_2D, pos);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    };
+
+    load_and_set_texture("bricks", t_bricks);
+    load_and_set_texture("glass", t_glass);
+    load_and_set_texture("roof", t_roof);
+    load_and_set_texture("rune", t_rune);
+    load_and_set_texture("wood", t_wood);
 }
 
 void Application::render() {
@@ -94,17 +106,17 @@ void Application::render() {
     glUniform3fv(eye_position_loc, 1, &camera.get_eye_position());
 
     // Set light
-    auto light_pos = Geometry::Vector(0.f, std::sin(app_time * 2), 2.f).Rotate(app_time, { 0.f, 1.f, 0.f });
+    auto light_pos = Geometry::Vector(0.f, std::sin(app_time) + 1.f, 1.5f).Rotate(app_time, { 0.f, 1.f, 0.f });
     // Position
     // W = 0.0 for directional, W = 1.0 for point
-    glUniform4f(light_position_loc, light_pos.x(), light_pos.y(), light_pos.z(), 1.0f);
+    glUniform4f(light_position_loc, light_pos.x(), light_pos.y(), light_pos.z(), 0.0f);
 
     // Colors
-    glUniform3f(light_ambient_color_loc, 0.05f, 0.05f, 0.05f);
+    glUniform3f(light_ambient_color_loc, 0.5f, 0.5f, 0.5f);
     glUniform3f(light_diffuse_color_loc, 1.0f, 1.0f, 1.0f);
     glUniform3f(light_specular_color_loc, 1.0f, 1.0f, 1.0f);
 
-    sphere.bind_vao();
+    ground.bind_vao();
 
     // Model matrix
     auto model_matrix = Geometry::Matrix<4>::Identity();
@@ -119,9 +131,21 @@ void Application::render() {
     // Texture
     glUniform1i(obj_texture_loc, 0);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture_01);
 
+    glBindTexture(GL_TEXTURE_2D, t_glass);
     sphere.draw();
+
+    glBindTexture(GL_TEXTURE_2D, t_bricks);
+    ground.draw();
+
+    glBindTexture(GL_TEXTURE_2D, t_wood);
+    pad.draw();
+
+    glUniform3f(material_ambient_color_loc, 1.0f, .5f, .5f);
+    glUniform3f(material_diffuse_color_loc, 1.0f, .5f, .5f);
+    glUniform3f(material_specular_color_loc, 1.0f, .5f, .5f);
+    glBindTexture(GL_TEXTURE_2D, t_rune);
+    brick.draw();
 }
 
 void Application::on_mouse_position(double x, double y) {

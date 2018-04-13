@@ -80,8 +80,8 @@ add_library(framework
 	"${FRAMEWORK_SRC_DIR}/shader.cpp"
 	"${FRAMEWORK_SRC_DIR}/program.cpp"
 	"${FRAMEWORK_SRC_DIR}/mesh.cpp"
-        "${FRAMEWORK_SRC_DIR}/camera.cpp"
-        "${FRAMEWORK_SRC_DIR}/texture.cpp"
+    "${FRAMEWORK_SRC_DIR}/camera.cpp"
+    "${FRAMEWORK_SRC_DIR}/texture.cpp"
 )
 add_dependencies(framework glfw glad)
 
