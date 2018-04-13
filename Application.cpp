@@ -106,13 +106,13 @@ void Application::render() {
     glUniform3fv(eye_position_loc, 1, &camera.get_eye_position());
 
     // Set light
-    auto light_pos = Geometry::Vector(0.f, std::sin(app_time) + 1.f, 1.5f).Rotate(app_time, { 0.f, 1.f, 0.f });
+    auto light_pos = Geometry::Vector(5.f / 4.f + 0.75f, 1.f, 0.f).Rotate(app_time, { 0.f, 1.f, 0.f });
     // Position
     // W = 0.0 for directional, W = 1.0 for point
-    glUniform4f(light_position_loc, light_pos.x(), light_pos.y(), light_pos.z(), 0.0f);
+    glUniform4f(light_position_loc, light_pos.x(), light_pos.y(), light_pos.z(), 0.f);
 
     // Colors
-    glUniform3f(light_ambient_color_loc, 0.5f, 0.5f, 0.5f);
+    glUniform3f(light_ambient_color_loc, 0.1f, 0.1f, 0.1f);
     glUniform3f(light_diffuse_color_loc, 1.0f, 1.0f, 1.0f);
     glUniform3f(light_specular_color_loc, 1.0f, 1.0f, 1.0f);
 

@@ -203,13 +203,13 @@ Mesh Mesh::ground(GLint position_location, GLint normal_location, GLint tex_coor
 
 Mesh Mesh::pad(GLint position_location, GLint normal_location, GLint tex_coord_location) {
     return Mesh::from_interleaved(pad_vertices,
-                                  pad_indices, GL_TRIANGLE_STRIP,
+                                  {}, GL_TRIANGLE_STRIP,
                                   position_location, normal_location, tex_coord_location);
 }
 
 Mesh Mesh::brick(GLint position_location, GLint normal_location, GLint tex_coord_location) {
     return Mesh::from_interleaved(brick_vertices,
-                                  brick_indices, GL_TRIANGLE_STRIP,
+                                  {}, GL_TRIANGLE_STRIP,
                                   position_location, normal_location, tex_coord_location);
 }
 
