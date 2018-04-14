@@ -109,7 +109,7 @@ target_include_directories(Main
 )
 
 # Tests
-add_executable(Test Tests.cpp)
+add_executable(Test TestsMain.cpp TestsGeometry.cpp TestsCollisions.cpp)
 target_link_libraries(Test ${GLFW_LIBRARIES} ${GLAD_LIBRARIES} framework)
 target_include_directories(Test
         PRIVATE ${GLFW_INCLUDE_DIR}

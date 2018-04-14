@@ -10,6 +10,8 @@
 #include "camera.hpp"
 #include "texture.hpp"
 
+#include "collisions/Collider.hpp"
+
 class Application {
 public:
     Application(int initial_window_width, int initial_window_height, const std::string& title)
