@@ -43,9 +43,9 @@ Vector ToVector(const glm::vec3& vec) {
 }
 
 void CHECK_APPROX(const Vector& lhs, const Vector& rhs) {
-    CHECK(lhs.x() == Approx(rhs.x()).epsilon(0.0001f));
-    CHECK(lhs.y() == Approx(rhs.y()).epsilon(0.0001f));
-    CHECK(lhs.z() == Approx(rhs.z()).epsilon(0.0001f));
+    CHECK(lhs.x() == Approx(rhs.x()).epsilon(0.001f));
+    CHECK(lhs.y() == Approx(rhs.y()).epsilon(0.001f));
+    CHECK(lhs.z() == Approx(rhs.z()).epsilon(0.001f));
 }
 
 GLMOperators(2);

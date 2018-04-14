@@ -16,6 +16,7 @@ struct PadCollider {
 };
 
 struct BoundsCollider {
+    float radius;
 };
 
 struct BallCollider {
@@ -42,7 +43,7 @@ struct BallCollider {
     }
 
     bool DidCollide(const BoundsCollider& other) const {
-        return false;
+        return position.Magnitude() > other.radius - radius;
     }
 
     Geometry::Vector Collision(const BallCollider& other) {
