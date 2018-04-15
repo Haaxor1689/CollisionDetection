@@ -13,6 +13,9 @@ const float angle = -2 * Geometry::Pi() / float(segments);
 const float s = sinf(angle);
 const float c = cosf(angle);
 
+const float brick_width = 0.5f;
+const float brick_height = 0.5f;
+
 inline void emplace_vert(std::vector<float>& vec, float x, float y, float z, float nx, float ny, float nz, float u, float v) {
     vec.emplace_back(x);
     vec.emplace_back(y);
@@ -35,7 +38,7 @@ inline void rotate(float& x, float& z) {
     z = newZ;
 }
 
-std::vector<float> get_ground_vertices() {
+inline std::vector<float> get_ground_vertices() {
     std::vector<float> ret;
     ret.reserve((segments + 2) * 5);
 
@@ -51,32 +54,29 @@ std::vector<float> get_ground_vertices() {
     return ret;
 };
 
-std::vector<float> get_brick_vertices(float distance, unsigned segmentsCount) {
+inline std::vector<float> get_brick_vertices(float distance, unsigned segmentsCount) {
     std::vector<float> ret;
     ret.reserve(segmentsCount * 20);
-
-    const float width = 0.5f;
-    const float height = 0.5f;
 
     // Front
     float x = distance;
     float z = 0.f;
     for (unsigned j = 0; j <= segmentsCount; ++j) {
         emplace_vert(ret, x, 0, z, -x, 0.f, -z, j, 1.f);
-        emplace_vert(ret, x, height, z, -x, 0.f, -z, j, 0.f);
+        emplace_vert(ret, x, brick_height, z, -x, 0.f, -z, j, 0.f);
         if (j != segmentsCount) {
             rotate(x, z);
         }
     }
-    emplace_filler(ret, x, height, z);
+    emplace_filler(ret, x, brick_height, z);
 
     // Back
-    x = distance + width;
+    x = distance + brick_width;
     z = 0.f;
 
-    emplace_filler(ret, x, height, z);
+    emplace_filler(ret, x, brick_height, z);
     for (unsigned j = 0; j <= segmentsCount; ++j) {
-        emplace_vert(ret, x, height, z, x, 0.f, z, j, 1.f);
+        emplace_vert(ret, x, brick_height, z, x, 0.f, z, j, 1.f);
         emplace_vert(ret, x, 0, z, x, 0.f, z, j, 2.f);
         if (j != segmentsCount) {
             rotate(x, z);
@@ -87,32 +87,32 @@ std::vector<float> get_brick_vertices(float distance, unsigned segmentsCount) {
     // Top
     float x1 = distance;
     float z1 = 0.f;
-    float x2 = distance + width;
+    float x2 = distance + brick_width;
     float z2 = 0.f;
 
-    emplace_filler(ret, x1, height, z1);
+    emplace_filler(ret, x1, brick_height, z1);
     for (unsigned j = 0; j <= segmentsCount; ++j) {
-        emplace_vert(ret, x1, height, z1, 0.f, 1.f, 0.f, j, 0.f);
-        emplace_vert(ret, x2, height, z2, 0.f, 1.f, 0.f, j, 1.f);
+        emplace_vert(ret, x1, brick_height, z1, 0.f, 1.f, 0.f, j, 0.f);
+        emplace_vert(ret, x2, brick_height, z2, 0.f, 1.f, 0.f, j, 1.f);
         if (j != segmentsCount) {
             rotate(x1, z1);
             rotate(x2, z2);
         }
     }
-    emplace_filler(ret, x2, height, z2);
+    emplace_filler(ret, x2, brick_height, z2);
 
     // Caps
-    emplace_vert(ret, x2, height, z2, z2, 0.f, -x2, 0.f, 0.f);
-    emplace_vert(ret, x1, height, z1, z2, 0.f, -x2, 1.f, 0.f);
+    emplace_vert(ret, x2, brick_height, z2, z2, 0.f, -x2, 0.f, 0.f);
+    emplace_vert(ret, x1, brick_height, z1, z2, 0.f, -x2, 1.f, 0.f);
     emplace_vert(ret, x2, 0.f, z2, z2, 0.f, -x2, 0.f, 1.f);
     emplace_vert(ret, x1, 0.f, z1, z2, 0.f, -x2, 1.f, 1.f);
     emplace_filler(ret, x1, 0.f, z1);
 
-    emplace_filler(ret, distance + width, 0.f, 0.f);
-    emplace_vert(ret, distance + width, 0.f, 0.f, 0.f, 0.f, 1.f, 1.f, 1.f);
+    emplace_filler(ret, distance + brick_width, 0.f, 0.f);
+    emplace_vert(ret, distance + brick_width, 0.f, 0.f, 0.f, 0.f, 1.f, 1.f, 1.f);
     emplace_vert(ret, distance, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 1.f);
-    emplace_vert(ret, distance + width, height, 0.f, 0.f, 0.f, 1.f, 1.f, 0.f);
-    emplace_vert(ret, distance, height, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f);
+    emplace_vert(ret, distance + brick_width, brick_height, 0.f, 0.f, 0.f, 1.f, 1.f, 0.f);
+    emplace_vert(ret, distance, brick_height, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f);
     return ret;
 };
 

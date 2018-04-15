@@ -6,26 +6,6 @@
 
 using namespace std;
 
-namespace {
-// void PrintPtr(const float* matrix) {
-//     cout << "{ ";
-//     for (int i = 0; i < 16; ++i) {
-//         cout << *matrix << ", ";
-//         ++matrix;
-//     }
-//     cout << "}" << std::endl;
-// }
-// std::ostream& operator<<(std::ostream& os, const glm::mat4& mat) {
-//     auto ptr = glm::value_ptr(mat);
-//     os << "{ ";
-//     for (size_t i = 0; i < 16; ++i) {
-//         os << *ptr << ", ";
-//         ++ptr;
-//     }
-//     return os << "}";
-// }
-} // namespace
-
 void Application::init() {
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClearDepth(1.0);

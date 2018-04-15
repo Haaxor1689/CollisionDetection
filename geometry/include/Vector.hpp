@@ -199,5 +199,9 @@ public:
     static Vector Cross(const Vector& lhs, const Vector& rhs) {
         return { lhs.y() * rhs.z() - rhs.y() * lhs.z(), lhs.z() * rhs.x() - rhs.z() * lhs.x(), lhs.x() * rhs.y() - rhs.x() * lhs.y() };
     }
+
+    inline static float Distance(const Vector& lhs, const Vector& rhs) {
+        return (lhs - rhs).Magnitude();
+    }
 };
 } // namespace Geometry
