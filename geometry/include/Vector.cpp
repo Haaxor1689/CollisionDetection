@@ -2,7 +2,9 @@
 
 #include "Matrix.hpp"
 
-Vector& Geometry::Vector::Rotate(float angle, Vector axis) {
+using namespace Geometry;
+
+Vector& Vector::Rotate(float angle, Vector axis) {
     float const c = cos(angle);
     float const s = sin(angle);
 

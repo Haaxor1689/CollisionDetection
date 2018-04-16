@@ -61,10 +61,10 @@ public:
 
     Matrix& Translate(const Vector& dimensions) {
         Matrix translation = Matrix::Identity();
-        translation[3][0] = dimensions.x();
-        translation[3][1] = dimensions.y();
-        translation[3][2] = dimensions.z();
-        return (*this) *= translation;
+        translation[0][3] = dimensions.x();
+        translation[1][3] = dimensions.y();
+        translation[2][3] = dimensions.z();
+        return *this = *this * translation;
     }
 
     Matrix& Rotate(float angle, Vector axis) {
@@ -74,7 +74,7 @@ public:
         axis.Normalize();
         Vector temp = axis * (1.f - c);
 
-        Matrix<3> rotation;
+        Matrix rotation = Matrix::Identity();
         rotation[0][0] = c + temp[0] * axis[0];
         rotation[1][0] = temp[0] * axis[1] + s * axis[2];
         rotation[2][0] = temp[0] * axis[2] - s * axis[1];
@@ -87,11 +87,7 @@ public:
         rotation[1][2] = temp[2] * axis[1] - s * axis[0];
         rotation[2][2] = c + temp[2] * axis[2];
 
-        Vector result;
-        result[0] = (*this)[0] * rotation[0][0] + (*this)[1] * rotation[0][1] + (*this)[2] * rotation[0][2];
-        result[1] = (*this)[0] * rotation[1][0] + (*this)[1] * rotation[1][1] + (*this)[2] * rotation[1][2];
-        result[2] = (*this)[0] * rotation[2][0] + (*this)[1] * rotation[2][1] + (*this)[2] * rotation[2][2];
-        return *this = result;
+        return *this = *this * rotation;
     }
 
     Matrix& Scale(const Vector& dimensions) {
@@ -99,7 +95,7 @@ public:
         scale[0][0] = dimensions.x();
         scale[1][1] = dimensions.y();
         scale[2][2] = dimensions.z();
-        return (*this) *= scale;
+        return *this = *this * scale;
     }
 
     int Determinant() const {
@@ -196,12 +192,12 @@ public:
     }
 
     // Matrix-Vector multiplication
-    friend Vector operator*(const Vector& vec, const Matrix<3>& mat) {
+    friend Vector operator*(const Vector& vec, const Matrix& mat) {
         Vector ret;
-        for (unsigned i = 0; i < vec.data.size(); ++i) {
+        for (unsigned i = 0; i < Width; ++i) {
             float sum = 0;
-            for (unsigned j = 0; j < vec.data.size(); ++j) {
-                sum += vec.data[j] * mat[j][i];
+            for (unsigned j = 0; j < Width; ++j) {
+                sum += vec[j] * mat[j][i];
             }
             ret[i] = sum;
         }
