@@ -3,7 +3,7 @@
 #include <array>
 #include <ostream>
 
-#include "Exceptions.hpp"
+#include "Vector.hpp"
 
 namespace Geometry {
 // Helper row class
@@ -57,6 +57,49 @@ public:
                 ++j;
             }
         }
+    }
+
+    Matrix& Translate(const Vector& dimensions) {
+        Matrix translation = Matrix::Identity();
+        translation[3][0] = dimensions.x();
+        translation[3][1] = dimensions.y();
+        translation[3][2] = dimensions.z();
+        return (*this) *= translation;
+    }
+
+    Matrix& Rotate(float angle, Vector axis) {
+        float const c = cos(angle);
+        float const s = sin(angle);
+
+        axis.Normalize();
+        Vector temp = axis * (1.f - c);
+
+        Matrix<3> rotation;
+        rotation[0][0] = c + temp[0] * axis[0];
+        rotation[1][0] = temp[0] * axis[1] + s * axis[2];
+        rotation[2][0] = temp[0] * axis[2] - s * axis[1];
+
+        rotation[0][1] = temp[1] * axis[0] - s * axis[2];
+        rotation[1][1] = c + temp[1] * axis[1];
+        rotation[2][1] = temp[1] * axis[2] + s * axis[0];
+
+        rotation[0][2] = temp[2] * axis[0] + s * axis[1];
+        rotation[1][2] = temp[2] * axis[1] - s * axis[0];
+        rotation[2][2] = c + temp[2] * axis[2];
+
+        Vector result;
+        result[0] = (*this)[0] * rotation[0][0] + (*this)[1] * rotation[0][1] + (*this)[2] * rotation[0][2];
+        result[1] = (*this)[0] * rotation[1][0] + (*this)[1] * rotation[1][1] + (*this)[2] * rotation[1][2];
+        result[2] = (*this)[0] * rotation[2][0] + (*this)[1] * rotation[2][1] + (*this)[2] * rotation[2][2];
+        return *this = result;
+    }
+
+    Matrix& Scale(const Vector& dimensions) {
+        Matrix scale = Matrix::Identity();
+        scale[0][0] = dimensions.x();
+        scale[1][1] = dimensions.y();
+        scale[2][2] = dimensions.z();
+        return (*this) *= scale;
     }
 
     int Determinant() const {
@@ -150,6 +193,19 @@ public:
             for (size_t i = 0; i < Width; ++i)
                 matrix[i][j] /= value;
         return matrix;
+    }
+
+    // Matrix-Vector multiplication
+    friend Vector operator*(const Vector& vec, const Matrix<3>& mat) {
+        Vector ret;
+        for (unsigned i = 0; i < vec.data.size(); ++i) {
+            float sum = 0;
+            for (unsigned j = 0; j < vec.data.size(); ++j) {
+                sum += vec.data[j] * mat[j][i];
+            }
+            ret[i] = sum;
+        }
+        return ret;
     }
 
     // Output stream operator

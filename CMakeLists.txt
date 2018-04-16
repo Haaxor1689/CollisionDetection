@@ -98,7 +98,7 @@ target_include_directories(framework
 )
 
 # Main
-add_executable(Main Main.cpp Application.cpp)
+add_executable(Main Main.cpp Application.cpp geometry/include/Vector.cpp)
 target_link_libraries(Main ${GLFW_LIBRARIES} ${GLAD_LIBRARIES} framework)
 target_include_directories(Main
         PRIVATE ${GLFW_INCLUDE_DIR}
@@ -110,7 +110,7 @@ target_include_directories(Main
 )
 
 # Tests
-add_executable(Test TestsMain.cpp TestsGeometry.cpp TestsCollisions.cpp)
+add_executable(Test TestsMain.cpp TestsGeometry.cpp TestsCollisions.cpp geometry/include/Vector.cpp)
 target_link_libraries(Test ${GLFW_LIBRARIES} ${GLAD_LIBRARIES} framework)
 target_include_directories(Test
         PRIVATE ${GLFW_INCLUDE_DIR}
