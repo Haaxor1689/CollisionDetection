@@ -78,9 +78,13 @@ private:
 
     // Colliders
     std::vector<Collisions::BallCollider> balls;
-    // std::array<Collisions::BrickCollider, 3> pads;
-    // std::vector<Collisions::BrickCollider> bricks;
+    std::vector<Collisions::BrickCollider> pads;
+    std::vector<Collisions::BrickCollider> bricks;
     Collisions::BoundsCollider bounds = { radius };
+
+    // Player input
+    float movement = 0.f;
+    float movement_speed = 0.05f;
 
     void draw_object(const Mesh& mesh, const Collisions::Collider& collider);
 

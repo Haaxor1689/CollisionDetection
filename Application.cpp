@@ -87,6 +87,20 @@ void Application::init() {
     for (unsigned i = 0; i < 3; ++i) {
         balls.emplace_back(Geometry::Vector<3>{ pos(e), 1.f, pos(e) }, Geometry::Vector<3>{ vel(e), 0.f, vel(e) }, 1.f);
     }
+
+    pads.emplace_back(radius * 3.f / 4.f, segments / 5.f, 0.f);
+    pads.emplace_back(radius * 3.f / 4.f, segments / 5.f, 2.f * Geometry::Pi() / 3.f);
+    pads.emplace_back(radius * 3.f / 4.f, segments / 5.f, 4.f * Geometry::Pi() / 3.f);
+
+    for (float i = 0; i < 4.f; ++i) {
+        float offset = i * 1.9f;
+        float height = i * brick_height;
+        bricks.emplace_back(radius / 4.f, segments / 6.f, 0.f + offset, height);
+        bricks.emplace_back(radius / 4.f, segments / 6.f, 2.f * Geometry::Pi() / 5.f + offset, height);
+        bricks.emplace_back(radius / 4.f, segments / 6.f, 4.f * Geometry::Pi() / 5.f + offset, height);
+        bricks.emplace_back(radius / 4.f, segments / 6.f, 6.f * Geometry::Pi() / 5.f + offset, height);
+        bricks.emplace_back(radius / 4.f, segments / 6.f, 8.f * Geometry::Pi() / 5.f + offset, height);
+    }
 }
 
 void Application::step() {
@@ -99,6 +113,10 @@ void Application::step() {
         for (auto& otherBall : balls) {
             ball.Collision(otherBall);
         }
+    }
+
+    for (auto& pad : pads) {
+        pad.Rotate(movement);
     }
 }
 
@@ -135,19 +153,23 @@ void Application::render() {
     auto model_matrix = Geometry::Matrix<4>::Identity();
     glUniformMatrix4fv(model_matrix_loc, 1, GL_FALSE, &model_matrix);
 
-    // sphere.draw();
     ground.draw();
-    // pad.draw();
-    // brick.draw();
 
     for (auto& ball : balls) {
         draw_object(sphere, ball);
+    }
+
+    for (auto& pad_col : pads) {
+        draw_object(pad, pad_col);
+    }
+
+    for (auto& brick_col : bricks) {
+        draw_object(brick, brick_col);
     }
 }
 
 void Application::draw_object(const Mesh& mesh, const Collisions::Collider& collider) {
     auto model_matrix = Geometry::Matrix<4>::Identity();
-
     class Visitor : public Collisions::ConstColliderVisitor {
     public:
         explicit Visitor(Geometry::Matrix<4>& model_matrix)
@@ -155,6 +177,12 @@ void Application::draw_object(const Mesh& mesh, const Collisions::Collider& coll
 
         void operator()(const Collisions::BallCollider& col) override {
             model_matrix.Translate(col.Position());
+        }
+
+        void operator()(const Collisions::BrickCollider& col) override {
+            model_matrix
+                .Rotate(col.Angle(), Geometry::Vector<3>{ 0.f, 1.f, 0.f })
+                .Translate(Geometry::Vector<3>{ 0.f, col.Height(), 0.f });
         }
 
         Geometry::Matrix<4>& model_matrix;
@@ -180,6 +208,20 @@ void Application::on_key(int key, int scancode, int actions, int mods) {
         return;
     case GLFW_KEY_F:
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        return;
+    case GLFW_KEY_A:
+        if (actions == GLFW_PRESS) {
+            movement -= movement_speed;
+        } else if (actions == GLFW_RELEASE) {
+            movement += movement_speed;
+        }
+        return;
+    case GLFW_KEY_D:
+        if (actions == GLFW_PRESS) {
+            movement += movement_speed;
+        } else if (actions == GLFW_RELEASE) {
+            movement -= movement_speed;
+        }
         return;
     }
 }

@@ -118,4 +118,4 @@ inline std::vector<float> get_brick_vertices(float distance, unsigned segmentsCo
 
 const std::vector<float> ground_vertices = get_ground_vertices();
 const std::vector<float> pad_vertices = get_brick_vertices(radius * 3.f / 4.f, segments / 5.f);
-const std::vector<float> brick_vertices = get_brick_vertices(radius / 4.f, segments / 2.f);
+const std::vector<float> brick_vertices = get_brick_vertices(radius / 4.f, segments / 6.f);
