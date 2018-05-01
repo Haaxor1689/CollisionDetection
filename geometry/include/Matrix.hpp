@@ -3,6 +3,7 @@
 #include <array>
 #include <ostream>
 
+#include "Exceptions.hpp"
 #include "Vector.hpp"
 
 namespace Geometry {
@@ -59,44 +60,9 @@ public:
         }
     }
 
-    Matrix& Translate(const Vector& dimensions) {
-        Matrix translation = Matrix::Identity();
-        translation[0][3] = dimensions.x();
-        translation[1][3] = dimensions.y();
-        translation[2][3] = dimensions.z();
-        return *this = *this * translation;
-    }
-
-    Matrix& Rotate(float angle, Vector axis) {
-        float const c = cos(angle);
-        float const s = sin(angle);
-
-        axis.Normalize();
-        Vector temp = axis * (1.f - c);
-
-        Matrix rotation = Matrix::Identity();
-        rotation[0][0] = c + temp[0] * axis[0];
-        rotation[1][0] = temp[0] * axis[1] + s * axis[2];
-        rotation[2][0] = temp[0] * axis[2] - s * axis[1];
-
-        rotation[0][1] = temp[1] * axis[0] - s * axis[2];
-        rotation[1][1] = c + temp[1] * axis[1];
-        rotation[2][1] = temp[1] * axis[2] + s * axis[0];
-
-        rotation[0][2] = temp[2] * axis[0] + s * axis[1];
-        rotation[1][2] = temp[2] * axis[1] - s * axis[0];
-        rotation[2][2] = c + temp[2] * axis[2];
-
-        return *this = *this * rotation;
-    }
-
-    Matrix& Scale(const Vector& dimensions) {
-        Matrix scale = Matrix::Identity();
-        scale[0][0] = dimensions.x();
-        scale[1][1] = dimensions.y();
-        scale[2][2] = dimensions.z();
-        return *this = *this * scale;
-    }
+    Matrix& Translate(const Vector<Width - 1>& dimensions) { throw DimensionsException("Matrix", "Translate"); }
+    Matrix& Rotate(float angle, Vector<Width - 1> axis) { throw DimensionsException("Matrix", "Rotate"); }
+    Matrix& Scale(const Vector<Width - 1>& dimensions) { throw DimensionsException("Matrix", "Scale"); }
 
     int Determinant() const {
         float det = 0;
@@ -192,8 +158,8 @@ public:
     }
 
     // Matrix-Vector multiplication
-    friend Vector operator*(const Vector& vec, const Matrix& mat) {
-        Vector ret;
+    friend Vector<Width> operator*(const Vector<Width>& vec, const Matrix& mat) {
+        Vector<Width> ret;
         for (unsigned i = 0; i < Width; ++i) {
             float sum = 0;
             for (unsigned j = 0; j < Width; ++j) {
@@ -245,5 +211,47 @@ public:
 template <>
 inline int Matrix<2>::Determinant() const {
     return data[0] * data[3] - data[1] * data[2];
+}
+
+template <>
+inline Matrix<4>& Matrix<4>::Translate(const Vector<3>& dimensions) {
+    Matrix translation = Matrix::Identity();
+    translation[0][3] = dimensions.x();
+    translation[1][3] = dimensions.y();
+    translation[2][3] = dimensions.z();
+    return *this = *this * translation;
+}
+
+template <>
+inline Matrix<4>& Matrix<4>::Rotate(float angle, Vector<3> axis) {
+    float const c = cos(angle);
+    float const s = sin(angle);
+
+    axis.Normalize();
+    Vector temp = axis * (1.f - c);
+
+    Matrix rotation = Matrix::Identity();
+    rotation[0][0] = c + temp[0] * axis[0];
+    rotation[1][0] = temp[0] * axis[1] + s * axis[2];
+    rotation[2][0] = temp[0] * axis[2] - s * axis[1];
+
+    rotation[0][1] = temp[1] * axis[0] - s * axis[2];
+    rotation[1][1] = c + temp[1] * axis[1];
+    rotation[2][1] = temp[1] * axis[2] + s * axis[0];
+
+    rotation[0][2] = temp[2] * axis[0] + s * axis[1];
+    rotation[1][2] = temp[2] * axis[1] - s * axis[0];
+    rotation[2][2] = c + temp[2] * axis[2];
+
+    return *this = *this * rotation;
+}
+
+template <>
+inline Matrix<4>& Matrix<4>::Scale(const Vector<3>& dimensions) {
+    Matrix scale = Matrix::Identity();
+    scale[0][0] = dimensions.x();
+    scale[1][1] = dimensions.y();
+    scale[2][2] = dimensions.z();
+    return *this = *this * scale;
 }
 } // namespace Geometry

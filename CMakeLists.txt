@@ -86,6 +86,7 @@ add_library(framework
 add_dependencies(framework glfw glad)
 
 set(GEOMETRY_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/geometry")
+set(COLLISIONS_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/collisions")
 
 target_link_libraries(framework ${GLFW_LIBRARIES} ${GLAD_LIBRARIES})
 target_include_directories(framework 
@@ -94,11 +95,12 @@ target_include_directories(framework
 	    PRIVATE ${FRAMEWORK_INCLUDE_DIR}
 	    PRIVATE ${SINGLE_HEADER_LIBS_INCLUDE_DIR}
         PRIVATE ${GEOMETRY_INCLUDE_DIR}
+        PRIVATE ${COLLISIONS_INCLUDE_DIR}
         PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/objects"
 )
 
 # Main
-add_executable(Main Main.cpp Application.cpp geometry/include/Vector.cpp)
+add_executable(Main Main.cpp Application.cpp)
 target_link_libraries(Main ${GLFW_LIBRARIES} ${GLAD_LIBRARIES} framework)
 target_include_directories(Main
         PRIVATE ${GLFW_INCLUDE_DIR}
@@ -106,11 +108,12 @@ target_include_directories(Main
         PRIVATE ${SINGLE_HEADER_LIBS_INCLUDE_DIR}
         PRIVATE ${FRAMEWORK_INCLUDE_DIR}
         PRIVATE ${GEOMETRY_INCLUDE_DIR}
+        PRIVATE ${COLLISIONS_INCLUDE_DIR}
         PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/objects"
 )
 
 # Tests
-add_executable(Test TestsMain.cpp TestsGeometry.cpp TestsCollisions.cpp geometry/include/Vector.cpp)
+add_executable(Test TestsMain.cpp TestsGeometry.cpp TestsCollisions.cpp)
 target_link_libraries(Test ${GLFW_LIBRARIES} ${GLAD_LIBRARIES} framework)
 target_include_directories(Test
         PRIVATE ${GLFW_INCLUDE_DIR}
@@ -118,5 +121,6 @@ target_include_directories(Test
         PRIVATE ${SINGLE_HEADER_LIBS_INCLUDE_DIR}
         PRIVATE ${FRAMEWORK_INCLUDE_DIR}
         PRIVATE ${GEOMETRY_INCLUDE_DIR}
+        PRIVATE ${COLLISIONS_INCLUDE_DIR}
         PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/objects"
 )

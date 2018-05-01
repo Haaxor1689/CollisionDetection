@@ -7,19 +7,36 @@
 #include <stdexcept>
 
 namespace Geometry {
+
+template <size_t Size>
 class Vector {
-    std::array<float, 3> data;
+    static_assert(Size >= 2 && Size <= 4, "Vector of size lesser than 2 or bigger than 4 is not supported.");
+    std::array<float, Size> data;
 
 public:
     Vector()
-        : data{ 0.f, 0.f, 0.f } {};
-    Vector(float x, float y, float z)
-        : data{ x, y, z } {}
+        : Vector(0.f) {}
+
     Vector(float x)
-        : Vector(x, x, x) {}
+        : data() {
+        for (auto& i : data)
+            i = x;
+    }
+
+    Vector(std::initializer_list<float>&& list) {
+        if (list.size() != Size)
+            throw std::invalid_argument("Can't initialize with list of size " + std::to_string(list.size()) + ". Size must be " + std::to_string(Size) + ".");
+
+        auto otherIt = list.begin();
+        for (auto thisIt = data.begin(); thisIt != data.end(); ++thisIt, ++otherIt)
+            *thisIt = *otherIt;
+    }
 
     float Magnitude() const {
-        return std::sqrt(x() * x() + y() * y() + z() * z());
+        auto ret = 0.f;
+        for (auto& i : data)
+            ret += i * i;
+        return std::sqrt(ret);
     }
 
     float& x() { return data[0]; }
@@ -37,7 +54,19 @@ public:
         return *this;
     }
 
-    Vector& Rotate(float angle, Vector axis);
+    Vector& Rotate(float angle, Vector axis) {
+        float const c = cos(angle);
+        float const s = sin(angle);
+
+        axis.Normalize();
+        Vector temp = axis * (1.f - c);
+
+        Vector result;
+        result[0] = (*this)[0] * (c + temp[0] * axis[0]) + (*this)[1] * (temp[1] * axis[0] - s * axis[2]) + (*this)[2] * (temp[2] * axis[0] + s * axis[1]);
+        result[1] = (*this)[0] * (temp[0] * axis[1] + s * axis[2]) + (*this)[1] * (c + temp[1] * axis[1]) + (*this)[2] * (temp[2] * axis[1] - s * axis[0]);
+        result[2] = (*this)[0] * (temp[0] * axis[2] - s * axis[1]) + (*this)[1] * (temp[1] * axis[2] + s * axis[0]) + (*this)[2] * (c + temp[2] * axis[2]);
+        return *this = result;
+    }
 
     Vector& Scale(Vector other) {
         auto otherIt = other.data.begin();
@@ -50,17 +79,14 @@ public:
         float mag = Magnitude();
         if (mag == 0)
             return *this;
-
-        x() /= mag;
-        y() /= mag;
-        z() /= mag;
+        for (auto& i : data)
+            i /= mag;
         return *this;
     }
 
     Vector& Invert() {
-        x() *= -1.f;
-        y() *= -1.f;
-        z() *= -1.f;
+        for (auto& i : data)
+            i *= -1.f;
         return *this;
     }
 
@@ -95,6 +121,34 @@ public:
     }
 
     friend Vector operator/(Vector lhs, const Vector& rhs) {
+        auto rhsIt = rhs.data.begin();
+        for (auto lhsIt = lhs.data.begin(); lhsIt != lhs.data.end(); ++lhsIt, ++rhsIt)
+            *lhsIt /= *rhsIt;
+        return lhs;
+    }
+
+    friend Vector& operator+=(Vector& lhs, const Vector& rhs) {
+        auto rhsIt = rhs.data.begin();
+        for (auto lhsIt = lhs.data.begin(); lhsIt != lhs.data.end(); ++lhsIt, ++rhsIt)
+            *lhsIt += *rhsIt;
+        return lhs;
+    }
+
+    friend Vector& operator-=(Vector& lhs, const Vector& rhs) {
+        auto rhsIt = rhs.data.begin();
+        for (auto lhsIt = lhs.data.begin(); lhsIt != lhs.data.end(); ++lhsIt, ++rhsIt)
+            *lhsIt -= *rhsIt;
+        return lhs;
+    }
+
+    friend Vector& operator*=(Vector& lhs, const Vector& rhs) {
+        auto rhsIt = rhs.data.begin();
+        for (auto lhsIt = lhs.data.begin(); lhsIt != lhs.data.end(); ++lhsIt, ++rhsIt)
+            *lhsIt *= *rhsIt;
+        return lhs;
+    }
+
+    friend Vector& operator/=(Vector& lhs, const Vector& rhs) {
         auto rhsIt = rhs.data.begin();
         for (auto lhsIt = lhs.data.begin(); lhsIt != lhs.data.end(); ++lhsIt, ++rhsIt)
             *lhsIt /= *rhsIt;
@@ -152,7 +206,10 @@ public:
 
     // Output stream operator
     friend std::ostream& operator<<(std::ostream& os, const Vector& vec) {
-        return os << "[" << vec.x() << ", " << vec.y() << ", " << vec.z() << "]";
+        os << "[";
+        for (auto& i : vec.data)
+            os << i << ", ";
+        return os << "]";
     }
 
     // Static methods
@@ -165,7 +222,11 @@ public:
     }
 
     static float Dot(const Vector& lhs, const Vector& rhs) {
-        return lhs.x() * rhs.x() + lhs.y() * rhs.y() + lhs.z() * rhs.z();
+        auto ret = 0.f;
+        auto rhsIt = rhs.data.begin();
+        for (auto lhsIt = lhs.data.begin(); lhsIt != lhs.data.end(); ++lhsIt, ++rhsIt)
+            ret += *lhsIt * *rhsIt;
+        return ret;
     }
 
     static Vector Cross(const Vector& lhs, const Vector& rhs) {
@@ -175,5 +236,25 @@ public:
     inline static float Distance(const Vector& lhs, const Vector& rhs) {
         return (lhs - rhs).Magnitude();
     }
+
+    Vector<2> To2() { return { data[0], data[2] }; }
+    Vector<3> To3() { return { data[0], data[1], data[2] }; }
+    Vector<4> To4() { return { data[0], data[1], data[2], data[3] }; }
 };
+
+template <>
+inline Vector<3> Vector<2>::To3() {
+    return { data[0], 0.f, data[1] };
+}
+
+template <>
+inline Vector<4> Vector<2>::To4() {
+    return { data[0], 0.f, data[2], 1.f };
+}
+
+template <>
+inline Vector<4> Vector<3>::To4() {
+    return { data[0], data[1], data[2], 1.f };
+}
+
 } // namespace Geometry

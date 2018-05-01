@@ -7,14 +7,14 @@
 #include "Geometry"
 
 const unsigned segments = 36;
-const float radius = 5.f;
+const float radius = 30.f;
 
 const float angle = -2 * Geometry::Pi() / float(segments);
 const float s = sinf(angle);
 const float c = cosf(angle);
 
-const float brick_width = 0.5f;
-const float brick_height = 0.5f;
+const float brick_width = 3.f;
+const float brick_height = 3.f;
 
 inline void emplace_vert(std::vector<float>& vec, float x, float y, float z, float nx, float ny, float nz, float u, float v) {
     vec.emplace_back(x);

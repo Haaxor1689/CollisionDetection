@@ -39,7 +39,7 @@ private:
     float distance;
 
     /// Final position of the eye in world space coordinates, for LookAt or shaders
-    Geometry::Vector eye_position;
+    Geometry::Vector<3> eye_position;
 
     /// Last X and Y coordinates of the mouse cursor
     int last_x, last_y;
@@ -64,5 +64,5 @@ public:
     void on_mouse_move(double x, double y);
 
     /// Returns the position of the eye in world space coordinates
-    Geometry::Vector get_eye_position() const;
+    Geometry::Vector<3> get_eye_position() const;
 };

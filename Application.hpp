@@ -10,7 +10,7 @@
 #include "camera.hpp"
 #include "texture.hpp"
 
-#include "collisions/Collider.hpp"
+#include "Collisions"
 
 class Application {
 public:
@@ -25,6 +25,7 @@ public:
     }
 
     void init();
+    void step();
     void render();
 
     void on_key(int key, int scancode, int actions, int mods);
@@ -32,15 +33,14 @@ public:
     void on_mouse_button(int button, int action, int mods);
     void on_resize(int width, int height);
 
-    // window must be first variable declared!
     Window window;
 
 private:
-    // application(yours) variables
     std::unique_ptr<ShaderProgram> program;
 
     Camera camera;
 
+    // Attr and uniform locations
     GLint color_loc = -1;
     GLint model_matrix_loc = -1;
     GLint view_matrix_loc = -1;
@@ -62,17 +62,27 @@ private:
 
     GLint eye_position_loc = -1;
 
+    // Textures
     GLuint t_bricks = 0;
     GLuint t_glass = 0;
     GLuint t_rune = 0;
     GLuint t_roof = 0;
     GLuint t_wood = 0;
 
+    // Meshes
     Mesh cube = Mesh::cube();
     Mesh sphere = Mesh::sphere();
     Mesh ground = Mesh::ground();
     Mesh pad = Mesh::pad();
     Mesh brick = Mesh::brick();
+
+    // Colliders
+    std::vector<Collisions::BallCollider> balls;
+    // std::array<Collisions::BrickCollider, 3> pads;
+    // std::vector<Collisions::BrickCollider> bricks;
+    Collisions::BoundsCollider bounds = { radius };
+
+    void draw_object(const Mesh& mesh, const Collisions::Collider& collider);
 
     static void on_key(GLFWwindow* window, int key, int scancode, int actions, int mods) {
         Application* this_pointer = static_cast<Application*>(glfwGetWindowUserPointer(window));

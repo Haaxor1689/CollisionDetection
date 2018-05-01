@@ -26,10 +26,10 @@ inline Matrix<4> Perspective(float fov, float aspect, float near, float far) {
     return ret;
 }
 
-inline Matrix<4> LookAt(Vector eye, Vector center, Vector up) {
-    auto f = Vector::Normalized(center - eye);
-    auto s = Vector::Normalized(Vector::Cross(f, up));
-    auto u = Vector::Cross(s, f);
+inline Matrix<4> LookAt(Vector<3> eye, Vector<3> center, Vector<3> up) {
+    auto f = Vector<3>::Normalized(center - eye);
+    auto s = Vector<3>::Normalized(Vector<3>::Cross(f, up));
+    auto u = Vector<3>::Cross(s, f);
 
     auto ret = Matrix<4>::Identity();
     ret[0][0] = s.x();
@@ -41,9 +41,9 @@ inline Matrix<4> LookAt(Vector eye, Vector center, Vector up) {
     ret[2][0] = -f.x();
     ret[2][1] = -f.y();
     ret[2][2] = -f.z();
-    ret[0][3] = -Vector::Dot(s, eye);
-    ret[1][3] = -Vector::Dot(u, eye);
-    ret[2][3] = Vector::Dot(f, eye);
+    ret[0][3] = -Vector<3>::Dot(s, eye);
+    ret[1][3] = -Vector<3>::Dot(u, eye);
+    ret[2][3] = Vector<3>::Dot(f, eye);
     return ret;
 }
 } // namespace Geometry

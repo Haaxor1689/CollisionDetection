@@ -34,13 +34,9 @@ int main(void) {
 
     // Loop
     while (!application->window.should_close()) {
-        // Render
+        application->step();
         application->render();
-
-        // Swap front and back buffers
         application->window.swap_buffers();
-
-        // Poll for and process events
         application->window.poll_events();
     }
 

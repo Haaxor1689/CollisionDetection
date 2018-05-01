@@ -38,14 +38,15 @@ float RandomFloat() {
     return rrd(e);
 }
 
-Vector ToVector(const glm::vec3& vec) {
+Vector<3> ToVector(const glm::vec3& vec) {
     return { vec.x, vec.y, vec.z };
 }
 
-void CHECK_APPROX(const Vector& lhs, const Vector& rhs) {
-    CHECK(lhs.x() == Approx(rhs.x()).epsilon(0.001f));
-    CHECK(lhs.y() == Approx(rhs.y()).epsilon(0.001f));
-    CHECK(lhs.z() == Approx(rhs.z()).epsilon(0.001f));
+template <size_t Size>
+void REQUIRE_APPROX(const Vector<Size>& lhs, const Vector<Size>& rhs) {
+    REQUIRE(lhs.x() == Approx(rhs.x()).epsilon(0.001f));
+    REQUIRE(lhs.y() == Approx(rhs.y()).epsilon(0.001f));
+    REQUIRE(lhs.z() == Approx(rhs.z()).epsilon(0.001f));
 }
 
 GLMOperators(2);
@@ -55,71 +56,68 @@ GLMOperators(4);
 
 TEST_CASE("Vector") {
     SECTION("Construction") {
-        auto cons = std::is_default_constructible_v<Vector>;
+        auto cons = std::is_default_constructible_v<Vector<3>>;
         REQUIRE(cons);
 
-        cons = std::is_constructible_v<Vector, float>;
+        cons = std::is_constructible_v<Vector<3>, float>;
         REQUIRE(cons);
 
-        cons = std::is_constructible_v<Vector, float, float, float>;
-        REQUIRE(cons);
-
-        Vector a;
+        Vector<3> a;
         CHECK(a.x() == 0.f);
         CHECK(a.y() == 0.f);
         CHECK(a.z() == 0.f);
 
-        Vector b(1.f, 2.f, 3.f);
+        Vector<3> b{ 1.f, 2.f, 3.f };
         CHECK(b.x() == 1.f);
         CHECK(b.y() == 2.f);
         CHECK(b.z() == 3.f);
 
-        Vector c(2.f);
+        Vector<3> c(2.f);
         CHECK(c.x() == 2.f);
         CHECK(c.y() == 2.f);
         CHECK(c.z() == 2.f);
     }
 
     SECTION("Copy ctor") {
-        Vector a(1.f, 2.f, 3.f);
-        Vector b(a);
+        Vector<3> a{ 1.f, 2.f, 3.f };
+        Vector<3> b(a);
         CHECK(b.x() == 1.f);
         CHECK(b.y() == 2.f);
         CHECK(b.z() == 3.f);
-        Vector c(Vector(4.f, 5.f, 6.f));
+        Vector<3> c(Vector<3>{ 4.f, 5.f, 6.f });
         CHECK(c.x() == 4.f);
         CHECK(c.y() == 5.f);
         CHECK(c.z() == 6.f);
     }
 
     SECTION("Copy assignment") {
-        Vector a(1.f, 2.f, 3.f);
-        Vector b(4.f, 5.f, 6.f);
+        Vector<3> a{ 1.f, 2.f, 3.f };
+        Vector<3> b{ 4.f, 5.f, 6.f };
         b = a;
         CHECK(b.x() == 1.f);
         CHECK(b.y() == 2.f);
         CHECK(b.z() == 3.f);
-        b = Vector(7.f, 8.f, 9.f);
+        b = Vector<3>{ 7.f, 8.f, 9.f };
         CHECK(b.x() == 7.f);
         CHECK(b.y() == 8.f);
         CHECK(b.z() == 9.f);
     }
 
     SECTION("Vector arithmetic operators") {
-        Vector a(1.f, 2.f, 3.f);
-        Vector b = a + a;
-        CHECK(b == Vector(2.f, 4.f, 6.f));
-        CHECK(a == Vector(1.f, 2.f, 3.f));
-        Vector c = b - a;
+        Vector<3> a{ 1.f, 2.f, 3.f };
+        Vector<3> b = a + a;
+        CHECK(b == Vector<3>{ 2.f, 4.f, 6.f });
+        CHECK(a == Vector<3>{ 1.f, 2.f, 3.f });
+        Vector<3> c = b - a;
         CHECK(c == a);
-        CHECK(b == Vector(2.f, 4.f, 6.f));
+        CHECK(b == Vector<3>{ 2.f, 4.f, 6.f });
     }
 
     SECTION("Magnitude") {
-        CHECK(Vector().Magnitude() == 0.f);
-        Vector a(1.f, 2.f, 3.f);
+        CHECK(Vector<3>().Magnitude() == 0.f);
+        Vector<3> a{ 1.f, 2.f, 3.f };
         CHECK(a.Magnitude() == std::sqrt(14.f));
-        Vector b(3.f, 2.f, 1.f);
+        Vector<3> b{ 3.f, 2.f, 1.f };
         CHECK(b.Magnitude() == a.Magnitude());
 
         auto mag = [](float x, float y, float z) {
@@ -130,56 +128,56 @@ TEST_CASE("Vector") {
             float x = RandomFloat();
             float y = RandomFloat();
             float z = RandomFloat();
-            CHECK(Vector(x, y, z).Magnitude() == mag(x, y, z));
+            REQUIRE(Vector<3>{ x, y, z }.Magnitude() == mag(x, y, z));
         }
     }
 
     SECTION("Normalization") {
-        CHECK(Vector().Normalize() == Vector());
+        CHECK(Vector<3>().Normalize() == Vector<3>());
 
-        Vector a(2.f, 1.f, 6.f);
-        Vector b = Vector::Normalized(a);
+        Vector<3> a{ 2.f, 1.f, 6.f };
+        Vector<3> b = Vector<3>::Normalized(a);
         CHECK(a.Normalize() == b);
 
         auto norm = [](float x, float y, float z) {
             float mag = std::sqrt(x * x + y * y + z * z);
             if (mag == 0.f)
-                return Vector();
-            return Vector(x / mag, y / mag, z / mag);
+                return Vector<3>();
+            return Vector<3>{ x / mag, y / mag, z / mag };
         };
 
         for (unsigned i = 0; i < 100; ++i) {
             float x = RandomFloat();
             float y = RandomFloat();
             float z = RandomFloat();
-            CHECK(Vector(x, y, z).Normalize() == norm(x, y, z));
+            REQUIRE(Vector<3>{ x, y, z }.Normalize() == norm(x, y, z));
         }
     }
 
     SECTION("Invert") {
-        CHECK(Vector().Invert() == Vector());
+        CHECK(Vector<3>().Invert() == Vector<3>());
 
-        Vector a(1.f, 2.f, 3.f);
-        Vector b(-1.f, -2.f, -3.f);
+        Vector<3> a{ 1.f, 2.f, 3.f };
+        Vector<3> b{ -1.f, -2.f, -3.f };
         CHECK(a.Invert() == b);
 
         auto inv = [](float x, float y, float z) {
-            return Vector(-x, -y, -z);
+            return Vector<3>{ -x, -y, -z };
         };
 
         for (unsigned i = 0; i < 100; ++i) {
             float x = RandomFloat();
             float y = RandomFloat();
             float z = RandomFloat();
-            CHECK(Vector(x, y, z).Invert() == inv(x, y, z));
+            CHECK(Vector<3>{ x, y, z }.Invert() == inv(x, y, z));
         }
     }
 
     SECTION("Dot product") {
-        CHECK(Vector::Dot(Vector(), Vector()) == 0);
-        CHECK(Vector::Dot(Vector(1.f), Vector(1.f)) == 3.f);
+        CHECK(Vector<3>::Dot(Vector<3>(), Vector<3>()) == 0);
+        CHECK(Vector<3>::Dot(Vector<3>(1.f), Vector<3>(1.f)) == 3.f);
 
-        auto dot = [](const Vector& lhs, const Vector& rhs) {
+        auto dot = [](const Vector<3>& lhs, const Vector<3>& rhs) {
             return lhs.x() * rhs.x() + lhs.y() * rhs.y() + lhs.z() * rhs.z();
         };
 
@@ -190,16 +188,16 @@ TEST_CASE("Vector") {
             float p = RandomFloat();
             float q = RandomFloat();
             float r = RandomFloat();
-            CHECK(Vector::Dot({ x, y, z }, { p, q, r }) == dot({ x, y, z }, { p, q, r }));
+            CHECK(Vector<3>::Dot({ x, y, z }, { p, q, r }) == dot({ x, y, z }, { p, q, r }));
         }
     }
 
     SECTION("Cross product") {
-        CHECK(Vector::Cross(Vector(), Vector()) == Vector());
-        CHECK(Vector::Cross({ 1.f, 0.f, 0.f }, { 0.f, 1.f, 0.f }) == Vector(0.f, 0.f, 1.f));
+        CHECK(Vector<3>::Cross(Vector<3>(), Vector<3>()) == Vector<3>());
+        CHECK(Vector<3>::Cross({ 1.f, 0.f, 0.f }, { 0.f, 1.f, 0.f }) == Vector<3>{ 0.f, 0.f, 1.f });
 
-        auto cross = [](const Vector& lhs, const Vector& rhs) {
-            return Vector(lhs.y() * rhs.z() - rhs.y() * lhs.z(), lhs.z() * rhs.x() - rhs.z() * lhs.x(), lhs.x() * rhs.y() - rhs.x() * lhs.y());
+        auto cross = [](const Vector<3>& lhs, const Vector<3>& rhs) {
+            return Vector<3>{ lhs.y() * rhs.z() - rhs.y() * lhs.z(), lhs.z() * rhs.x() - rhs.z() * lhs.x(), lhs.x() * rhs.y() - rhs.x() * lhs.y() };
         };
 
         for (unsigned i = 0; i < 100; ++i) {
@@ -209,19 +207,19 @@ TEST_CASE("Vector") {
             float p = RandomFloat();
             float q = RandomFloat();
             float r = RandomFloat();
-            CHECK(Vector::Cross({ x, y, z }, { p, q, r }) == cross({ x, y, z }, { p, q, r }));
+            CHECK(Vector<3>::Cross({ x, y, z }, { p, q, r }) == cross({ x, y, z }, { p, q, r }));
         }
     }
 
     SECTION("Matrix multiplication") {
-        Vector vec = { 1.f, 2.f, 3.f };
+        Vector<3> vec = { 1.f, 2.f, 3.f };
         Matrix<3> mat = {
             1.f, 2.f, 3.f,
             4.f, 5.f, 6.f,
             7.f, 8.f, 9.f
         };
 
-        Vector expected = { 14.f, 32.f, 50.f };
+        Vector<3> expected = { 14.f, 32.f, 50.f };
         CHECK(vec * mat == expected);
     }
 
@@ -234,9 +232,9 @@ TEST_CASE("Vector") {
             float q = RandomFloat();
             float r = RandomFloat();
             float angle = RandomFloat();
-            CHECK(Vector{ x, y, z }.Translate({ p, q, r }) == Vector{ x, y, z } + Vector{ p, q, r });
-            CHECK_APPROX(Vector{ x, y, z }.Rotate(angle, { p, q, r }), ToVector(glm::rotate(glm::vec3(x, y, z), angle, glm::vec3(p, q, r))));
-            CHECK(Vector{ x, y, z }.Scale({ p, q, r }) == Vector{ x, y, z } * Vector{ p, q, r });
+            REQUIRE(Vector<3>{ x, y, z }.Translate({ p, q, r }) == Vector<3>{ x, y, z } + Vector<3>{ p, q, r });
+            REQUIRE_APPROX(Vector<3>{ x, y, z }.Rotate(angle, { p, q, r }), ToVector(glm::rotate(glm::vec3(x, y, z), angle, glm::vec3(p, q, r))));
+            REQUIRE(Vector<3>{ x, y, z }.Scale({ p, q, r }) == Vector<3>{ x, y, z } * Vector<3>{ p, q, r });
         }
     }
 }

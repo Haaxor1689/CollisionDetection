@@ -2,14 +2,14 @@
 
 #include <GLFW/glfw3.h>
 
-const float Camera::min_elevation = -1.5f;
+const float Camera::min_elevation = 0.1f;
 const float Camera::max_elevation = 1.5f;
 const float Camera::min_distance = 1.0f;
 const float Camera::angle_sensitivity = 0.008f;
 const float Camera::zoom_sensitivity = 0.003f;
 
 Camera::Camera()
-    : angle_direction(0.0f), angle_elevation(0.0f), distance(5.0f), last_x(0), last_y(0), is_rotating(false),
+    : angle_direction(0.0f), angle_elevation(1.5f), distance(80.0f), last_x(0), last_y(0), is_rotating(false),
       is_zooming(false) {
     update_eye_pos();
 }
@@ -65,6 +65,6 @@ void Camera::on_mouse_move(double x, double y) {
     update_eye_pos();
 }
 
-Geometry::Vector Camera::get_eye_position() const {
+Geometry::Vector<3> Camera::get_eye_position() const {
     return eye_position;
 }

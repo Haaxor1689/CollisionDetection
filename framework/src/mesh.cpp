@@ -150,8 +150,9 @@ void Mesh::create_vao(GLint position_location, GLint normal_location, GLint tex_
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void Mesh::draw() {
+void Mesh::draw() const {
     this->bind_vao();
+    glBindTexture(GL_TEXTURE_2D, texture);
 
     if (this->indices_buffer_id > 0) {
         glDrawElements(this->mode, static_cast<GLsizei>(this->indices_count), GL_UNSIGNED_INT, nullptr);

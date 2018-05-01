@@ -1,6 +1,7 @@
 #include "Application.hpp"
 
 #include <iostream>
+#include <random>
 
 #include "Geometry"
 
@@ -11,10 +12,10 @@ void Application::init() {
     glClearDepth(1.0);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
-    // glFrontFace(GL_CW);
 
     // Create shader program
     program = make_unique<ShaderProgram>("shaders/main.vert", "shaders/main.frag");
+    program->use();
 
     // Get locations of vertex attributes position and normal
     GLint position_loc = program->get_attribute_location("position");
@@ -39,12 +40,6 @@ void Application::init() {
 
     obj_texture_loc = program->get_uniform_location("obj_texture");
 
-    cube.create_vao(position_loc, normal_loc, tex_coord_loc);
-    sphere.create_vao(position_loc, normal_loc, tex_coord_loc);
-    ground.create_vao(position_loc, normal_loc, tex_coord_loc);
-    pad.create_vao(position_loc, normal_loc, tex_coord_loc);
-    brick.create_vao(position_loc, normal_loc, tex_coord_loc);
-
     auto load_and_set_texture = [](const std::string& name, GLuint& pos) {
         pos = load_texture_2d("images/" + name + ".png");
         glBindTexture(GL_TEXTURE_2D, pos);
@@ -60,6 +55,51 @@ void Application::init() {
     load_and_set_texture("roof", t_roof);
     load_and_set_texture("rune", t_rune);
     load_and_set_texture("wood", t_wood);
+
+    // Materials
+    glUniform3f(material_ambient_color_loc, 1.0f, 1.0f, 1.0f);
+    glUniform3f(material_diffuse_color_loc, 1.0f, 1.0f, 1.0f);
+    glUniform3f(material_specular_color_loc, 1.0f, 1.0f, 1.0f);
+    glUniform1f(material_shininess_loc, 200.0f);
+
+    // Texture
+    glUniform1i(obj_texture_loc, 0);
+    glActiveTexture(GL_TEXTURE0);
+
+    cube.create_vao(position_loc, normal_loc, tex_coord_loc);
+    sphere.create_vao(position_loc, normal_loc, tex_coord_loc);
+    ground.create_vao(position_loc, normal_loc, tex_coord_loc);
+    pad.create_vao(position_loc, normal_loc, tex_coord_loc);
+    brick.create_vao(position_loc, normal_loc, tex_coord_loc);
+
+    cube.set_texture(t_roof);
+    sphere.set_texture(t_glass);
+    ground.set_texture(t_bricks);
+    pad.set_texture(t_wood);
+    brick.set_texture(t_rune);
+
+    // Objects
+    std::random_device r;
+    std::default_random_engine e(r());
+    std::uniform_real_distribution<float> pos(-15.f, 15.f);
+    std::uniform_real_distribution<float> vel(-0.5f, 0.5f);
+
+    for (unsigned i = 0; i < 3; ++i) {
+        balls.emplace_back(Geometry::Vector<3>{ pos(e), 1.f, pos(e) }, Geometry::Vector<3>{ vel(e), 0.f, vel(e) }, 1.f);
+    }
+}
+
+void Application::step() {
+    for (auto& ball : balls) {
+        ball.Step();
+    }
+
+    for (auto& ball : balls) {
+        ball.Collision(bounds);
+        for (auto& otherBall : balls) {
+            ball.Collision(otherBall);
+        }
+    }
 }
 
 void Application::render() {
@@ -74,21 +114,16 @@ void Application::render() {
     // Clear screen, both color and depth
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Bind(use) our program
-    program->use();
-
     // Set cameras projection and view matrices and eye location
     auto projection_matrix = Geometry::Perspective(45.0f, aspect_ratio, 0.1f, 100.0f);
-    auto view_matrix = Geometry::LookAt(camera.get_eye_position(), { 0.0f }, { 0.0f, 1.0f, 0.0f });
+    auto view_matrix = Geometry::LookAt(camera.get_eye_position(), Geometry::Vector<3>(), { 0.0f, 1.0f, 0.0f });
 
     glUniformMatrix4fv(projection_matrix_loc, 1, GL_FALSE, &projection_matrix);
     glUniformMatrix4fv(view_matrix_loc, 1, GL_FALSE, &view_matrix);
     glUniform3fv(eye_position_loc, 1, &camera.get_eye_position());
 
     // Set light
-    auto light_pos = Geometry::Vector(5.f / 4.f + 0.75f, 1.f, 0.f).Rotate(app_time, { 0.f, 1.f, 0.f });
-    // Position
-    // W = 0.0 for directional, W = 1.0 for point
+    auto light_pos = Geometry::Vector<3>{ 5.f / 4.f + 0.75f, 1.f, 0.f }.Rotate(app_time, { 0.f, 1.f, 0.f });
     glUniform4f(light_position_loc, light_pos.x(), light_pos.y(), light_pos.z(), 0.f);
 
     // Colors
@@ -96,36 +131,39 @@ void Application::render() {
     glUniform3f(light_diffuse_color_loc, 1.0f, 1.0f, 1.0f);
     glUniform3f(light_specular_color_loc, 1.0f, 1.0f, 1.0f);
 
-    ground.bind_vao();
-
     // Model matrix
     auto model_matrix = Geometry::Matrix<4>::Identity();
     glUniformMatrix4fv(model_matrix_loc, 1, GL_FALSE, &model_matrix);
 
-    // Materials
-    glUniform3f(material_ambient_color_loc, 1.0f, 1.0f, 1.0f);
-    glUniform3f(material_diffuse_color_loc, 1.0f, 1.0f, 1.0f);
-    glUniform3f(material_specular_color_loc, 1.0f, 1.0f, 1.0f);
-    glUniform1f(material_shininess_loc, 200.0f);
-
-    // Texture
-    glUniform1i(obj_texture_loc, 0);
-    glActiveTexture(GL_TEXTURE0);
-
-    glBindTexture(GL_TEXTURE_2D, t_glass);
-    sphere.draw();
-
-    glBindTexture(GL_TEXTURE_2D, t_bricks);
+    // sphere.draw();
     ground.draw();
+    // pad.draw();
+    // brick.draw();
 
-    glBindTexture(GL_TEXTURE_2D, t_wood);
-    pad.draw();
+    for (auto& ball : balls) {
+        draw_object(sphere, ball);
+    }
+}
 
-    glUniform3f(material_ambient_color_loc, 1.0f, .5f, .5f);
-    glUniform3f(material_diffuse_color_loc, 1.0f, .5f, .5f);
-    glUniform3f(material_specular_color_loc, 1.0f, .5f, .5f);
-    glBindTexture(GL_TEXTURE_2D, t_rune);
-    brick.draw();
+void Application::draw_object(const Mesh& mesh, const Collisions::Collider& collider) {
+    auto model_matrix = Geometry::Matrix<4>::Identity();
+
+    class Visitor : public Collisions::ConstColliderVisitor {
+    public:
+        explicit Visitor(Geometry::Matrix<4>& model_matrix)
+            : model_matrix(model_matrix) {}
+
+        void operator()(const Collisions::BallCollider& col) override {
+            model_matrix.Translate(col.Position());
+        }
+
+        Geometry::Matrix<4>& model_matrix;
+        bool stopThere = false;
+    } visitor{ model_matrix };
+    collider.visit(visitor);
+
+    glUniformMatrix4fv(model_matrix_loc, 1, GL_FALSE, &model_matrix);
+    mesh.draw();
 }
 
 void Application::on_mouse_position(double x, double y) {
@@ -139,16 +177,14 @@ void Application::on_key(int key, int scancode, int actions, int mods) {
     switch (key) {
     case GLFW_KEY_L:
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        break;
+        return;
     case GLFW_KEY_F:
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        break;
+        return;
     }
 }
 
 void Application::on_resize(int width, int height) {
     window.resize(width, height);
-
-    // Set the area into which we render
     glViewport(0, 0, width, height);
 }

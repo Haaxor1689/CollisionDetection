@@ -5,6 +5,8 @@
 #include <vector>
 #include <string>
 
+#include "Geometry"
+
 class Mesh {
 public:
     Mesh(const std::string& file_name, GLint position_location = -1, GLint normal_location = -1,
@@ -28,10 +30,11 @@ public:
     Mesh(const Mesh& other);
 
     void create_vao(GLint position_location = -1, GLint normal_location = -1, GLint tex_coord_location = -1);
-    GLuint get_vao_id() { return this->vao_id; }
-    void bind_vao() { glBindVertexArray(this->vao_id); }
+    void set_texture(GLuint texture_id) { texture = texture_id; }
+    GLuint get_vao_id() const { return this->vao_id; }
+    void bind_vao() const { glBindVertexArray(this->vao_id); }
 
-    void draw();
+    void draw() const;
 
     static Mesh from_interleaved(std::vector<float> interleaved_vertices, std::vector<uint32_t> indices,
                                  GLenum mode = GL_TRIANGLES, GLint position_location = -1, GLint normal_location = -1,
@@ -64,4 +67,6 @@ private:
     GLint tex_coord_location = -1;
 
     GLenum mode = GL_TRIANGLES;
+
+    GLuint texture = 0;
 };
