@@ -3,19 +3,25 @@
 #include <iostream>
 #include <random>
 
+#define NK_INCLUDE_FIXED_TYPES
+#define NK_INCLUDE_STANDARD_IO
+#define NK_INCLUDE_STANDARD_VARARGS
+#define NK_INCLUDE_DEFAULT_ALLOCATOR
+#define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
+#define NK_INCLUDE_FONT_BAKING
+#define NK_INCLUDE_DEFAULT_FONT
+#define NK_IMPLEMENTATION
+#define NK_GLFW_GL3_IMPLEMENTATION
+#include "nuklear.h"
+#include "nuklear_glfw_gl3.h"
+
 #include "Geometry"
 
 using namespace std;
 
 void Application::init() {
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glClearDepth(1.0);
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-
     // Create shader program
     program = make_unique<ShaderProgram>("shaders/main.vert", "shaders/main.frag");
-    program->use();
 
     // Get locations of vertex attributes position and normal
     GLint position_loc = program->get_attribute_location("position");
@@ -47,7 +53,6 @@ void Application::init() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glBindTexture(GL_TEXTURE_2D, 0);
     };
 
     load_and_set_texture("bricks", t_bricks);
@@ -55,16 +60,7 @@ void Application::init() {
     load_and_set_texture("roof", t_roof);
     load_and_set_texture("rune", t_rune);
     load_and_set_texture("wood", t_wood);
-
-    // Materials
-    glUniform3f(material_ambient_color_loc, 1.0f, 1.0f, 1.0f);
-    glUniform3f(material_diffuse_color_loc, 1.0f, 1.0f, 1.0f);
-    glUniform3f(material_specular_color_loc, 1.0f, 1.0f, 1.0f);
-    glUniform1f(material_shininess_loc, 200.0f);
-
-    // Texture
-    glUniform1i(obj_texture_loc, 0);
-    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     cube.create_vao(position_loc, normal_loc, tex_coord_loc);
     sphere.create_vao(position_loc, normal_loc, tex_coord_loc);
@@ -78,29 +74,32 @@ void Application::init() {
     pad.set_texture(t_wood);
     brick.set_texture(t_rune);
 
+    // Nuklear
+    ctx = nk_glfw3_init(window.get_window(), NK_GLFW3_INSTALL_CALLBACKS);
+    nk_glfw3_font_stash_begin(&atlas);
+    nk_glfw3_font_stash_end();
+
     // Objects
     std::random_device r;
     std::default_random_engine e(r());
     std::uniform_real_distribution<float> pos(-15.f, 15.f);
     std::uniform_real_distribution<float> vel(-0.5f, 0.5f);
 
-    for (unsigned i = 0; i < 1; ++i) {
+    for (unsigned i = 0; i < 3; ++i) {
         balls.emplace_back(Geometry::Vector<3>{ pos(e), 1.f, pos(e) }, Geometry::Vector<3>{ vel(e), 0.f, vel(e) }, 1.f);
     }
 
-    pads.emplace_back(radius * 3.f / 4.f, segments / 5.f, 0.f);
-    // pads.emplace_back(radius * 3.f / 4.f, segments / 5.f, 2.f * Geometry::Pi() / 3.f);
-    // pads.emplace_back(radius * 3.f / 4.f, segments / 5.f, 4.f * Geometry::Pi() / 3.f);
+    pads.emplace_back(pad_distance, pad_segments, 0.f);
+    pads.emplace_back(pad_distance, pad_segments, 2.f * Geometry::Pi() / 3.f);
+    pads.emplace_back(pad_distance, pad_segments, 4.f * Geometry::Pi() / 3.f);
 
-    // for (float i = 0; i < 4.f; ++i) {
-    //     float offset = i * 1.9f;
-    //     float height = i * brick_height;
-    //     bricks.emplace_back(radius / 4.f, segments / 6.f, 0.f + offset, height);
-    //     bricks.emplace_back(radius / 4.f, segments / 6.f, 2.f * Geometry::Pi() / 5.f + offset, height);
-    //     bricks.emplace_back(radius / 4.f, segments / 6.f, 4.f * Geometry::Pi() / 5.f + offset, height);
-    //     bricks.emplace_back(radius / 4.f, segments / 6.f, 6.f * Geometry::Pi() / 5.f + offset, height);
-    //     bricks.emplace_back(radius / 4.f, segments / 6.f, 8.f * Geometry::Pi() / 5.f + offset, height);
-    // }
+    for (float i = 0; i < 4.f; ++i) {
+        float offset = i * 1.9f;
+        float height = i * brick_height;
+        for (int j = 0; j < 8; ++j) {
+            bricks.emplace_back(brick_distance, brick_segments, 2.f * j * Geometry::Pi() / 8.f + offset, height);
+        }
+    }
 }
 
 void Application::step() {
@@ -127,6 +126,14 @@ void Application::step() {
 }
 
 void Application::render() {
+    nk_glfw3_new_frame();
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClearDepth(1.0);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+
+    program->use();
+
     // Get the current time
     float app_time = float(glfwGetTime());
 
@@ -139,7 +146,7 @@ void Application::render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Set cameras projection and view matrices and eye location
-    auto projection_matrix = Geometry::Perspective(45.0f, aspect_ratio, 0.1f, 100.0f);
+    auto projection_matrix = Geometry::Perspective(45.0f, aspect_ratio, 1.f, 200.0f);
     auto view_matrix = Geometry::LookAt(camera.get_eye_position(), Geometry::Vector<3>(), { 0.0f, 1.0f, 0.0f });
 
     glUniformMatrix4fv(projection_matrix_loc, 1, GL_FALSE, &projection_matrix);
@@ -154,6 +161,16 @@ void Application::render() {
     glUniform3f(light_ambient_color_loc, 0.1f, 0.1f, 0.1f);
     glUniform3f(light_diffuse_color_loc, 1.0f, 1.0f, 1.0f);
     glUniform3f(light_specular_color_loc, 1.0f, 1.0f, 1.0f);
+
+    // Materials
+    glUniform3f(material_ambient_color_loc, 1.0f, 1.0f, 1.0f);
+    glUniform3f(material_diffuse_color_loc, 1.0f, 1.0f, 1.0f);
+    glUniform3f(material_specular_color_loc, 1.0f, 1.0f, 1.0f);
+    glUniform1f(material_shininess_loc, 200.0f);
+
+    // Texture
+    glUniform1i(obj_texture_loc, 0);
+    glActiveTexture(GL_TEXTURE0);
 
     // Model matrix
     auto model_matrix = Geometry::Matrix<4>::Identity();
@@ -172,6 +189,47 @@ void Application::render() {
     for (auto& brick_col : bricks) {
         draw_object(brick, brick_col);
     }
+
+    nk_glfw3_render(NK_ANTI_ALIASING_ON, 512 * 1024, 128 * 1024);
+}
+
+void Application::gui() {
+    if (nk_begin(ctx, "Debug", nk_rect(10, 10, 230, 400), NK_WINDOW_TITLE | NK_WINDOW_BORDER)) {
+        nk_layout_row_dynamic(ctx, 32, 1);
+        nk_label(ctx, "Ball", NK_TEXT_LEFT);
+        auto ballPosition = balls[0].Position();
+        auto ballAngle = Geometry::Degrees(std::atan2(ballPosition.z(), ballPosition.x()));
+
+        nk_layout_row_static(ctx, 26, 100, 2);
+        nk_label(ctx, "Position: ", NK_TEXT_LEFT);
+        nk_label(ctx, ("[" + std::to_string((int)ballPosition.x()) + ", " + std::to_string((int)ballPosition.z()) + "]").c_str(), NK_TEXT_LEFT);
+
+        nk_layout_row_static(ctx, 26, 100, 2);
+        nk_label(ctx, "Distance: ", NK_TEXT_LEFT);
+        nk_label(ctx, std::to_string(ballPosition.Magnitude()).c_str(), NK_TEXT_LEFT);
+
+        nk_layout_row_static(ctx, 26, 100, 2);
+        nk_label(ctx, "Angle: ", NK_TEXT_LEFT);
+        nk_label(ctx, std::to_string(ballAngle).c_str(), NK_TEXT_LEFT);
+
+        nk_layout_row_dynamic(ctx, 32, 1);
+        nk_label(ctx, "Pad", NK_TEXT_LEFT);
+        float startAngle = Geometry::Degrees(pads[0].AngleStart());
+        float endAngle = Geometry::Degrees(pads[0].AngleEnd());
+
+        nk_layout_row_static(ctx, 26, 100, 2);
+        nk_label(ctx, "Distance: ", NK_TEXT_LEFT);
+        nk_label(ctx, std::to_string(pads[0].MiddleRadius()).c_str(), NK_TEXT_LEFT);
+
+        nk_layout_row_static(ctx, 26, 100, 2);
+        nk_label(ctx, "Start Angle: ", NK_TEXT_LEFT);
+        nk_label(ctx, std::to_string(startAngle).c_str(), NK_TEXT_LEFT);
+
+        nk_layout_row_static(ctx, 26, 100, 2);
+        nk_label(ctx, "End Angle: ", NK_TEXT_LEFT);
+        nk_label(ctx, std::to_string(endAngle).c_str(), NK_TEXT_LEFT);
+    }
+    nk_end(ctx);
 }
 
 void Application::draw_object(const Mesh& mesh, const Collisions::Collider& collider) {
@@ -187,7 +245,7 @@ void Application::draw_object(const Mesh& mesh, const Collisions::Collider& coll
 
         void operator()(const Collisions::BrickCollider& col) override {
             model_matrix
-                .Rotate(col.AngleStart(), Geometry::Vector<3>{ 0.f, 1.f, 0.f })
+                .Rotate(-col.AngleStart(), Geometry::Vector<3>{ 0.f, 1.f, 0.f })
                 .Translate(Geometry::Vector<3>{ 0.f, col.Height(), 0.f });
         }
 

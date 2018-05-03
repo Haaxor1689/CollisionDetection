@@ -7,7 +7,7 @@
 #include "Geometry"
 
 const unsigned segments = 36;
-const float radius = 30.f;
+const float radius = 40.f;
 
 const float angle = -2 * Geometry::Pi() / float(segments);
 const float s = sinf(angle);
@@ -116,6 +116,11 @@ inline std::vector<float> get_brick_vertices(float distance, unsigned segmentsCo
     return ret;
 };
 
+const float pad_distance = radius * 3.f / 4.f;
+const float pad_segments = segments / 6.f;
+const float brick_distance = radius / 4.f;
+const float brick_segments = segments / 12.f;
+
 const std::vector<float> ground_vertices = get_ground_vertices();
-const std::vector<float> pad_vertices = get_brick_vertices(radius * 3.f / 4.f, segments / 5.f);
-const std::vector<float> brick_vertices = get_brick_vertices(radius / 4.f, segments / 6.f);
+const std::vector<float> pad_vertices = get_brick_vertices(pad_distance, pad_segments);
+const std::vector<float> brick_vertices = get_brick_vertices(brick_distance, brick_segments);

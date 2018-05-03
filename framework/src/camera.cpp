@@ -9,7 +9,7 @@ const float Camera::angle_sensitivity = 0.008f;
 const float Camera::zoom_sensitivity = 0.003f;
 
 Camera::Camera()
-    : angle_direction(0.0f), angle_elevation(1.5f), distance(80.0f), last_x(0), last_y(0), is_rotating(false),
+    : angle_direction(Geometry::Pi() / 2.f), angle_elevation(1.2f), distance(90.0f), last_x(0), last_y(0), is_rotating(false),
       is_zooming(false) {
     update_eye_pos();
 }

@@ -56,7 +56,6 @@ public:
 
     void Collision(const BrickCollider& other) {
         float mag = position.Magnitude();
-        float angleEnd = other.AngleEnd();
 
         // Return if ball isn't inside the ring
         if (mag > other.OuterRadius() + radius || mag < other.InnerRadius() - radius) {

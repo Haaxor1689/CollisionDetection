@@ -35,6 +35,7 @@ int main(void) {
     // Loop
     while (!application->window.should_close()) {
         application->step();
+        application->gui();
         application->render();
         application->window.swap_buffers();
         application->window.poll_events();

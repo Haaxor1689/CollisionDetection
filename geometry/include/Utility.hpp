@@ -14,6 +14,10 @@ constexpr float Radians(float degrees) {
     return degrees * Pi() / 180;
 }
 
+constexpr float Degrees(float radians) {
+    return radians * 180 / Pi();
+}
+
 inline Matrix<4> Perspective(float fov, float aspect, float near, float far) {
     float S = 1.f / std::tan(Radians(fov) * 0.5f);
 

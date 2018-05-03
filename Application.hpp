@@ -9,6 +9,7 @@
 #include "window.hpp"
 #include "camera.hpp"
 #include "texture.hpp"
+#include "font.hpp"
 
 #include "Collisions"
 
@@ -27,6 +28,7 @@ public:
     void init();
     void step();
     void render();
+    void gui();
 
     void on_key(int key, int scancode, int actions, int mods);
     void on_mouse_position(double x, double y);
@@ -68,6 +70,10 @@ private:
     GLuint t_rune = 0;
     GLuint t_roof = 0;
     GLuint t_wood = 0;
+
+    // Nuklear
+    struct nk_context* ctx;
+    struct nk_font_atlas* atlas;
 
     // Meshes
     Mesh cube = Mesh::cube();
