@@ -22,37 +22,13 @@ public:
     void visit(ColliderVisitor& visitor) { visitor(*this); }
     void visit(ConstColliderVisitor& visitor) const { visitor(*this); }
 
-    void Step() {
-        position += velocity;
-    }
+    void Step() { position += velocity; }
 
     const Geometry::Vector<3>& Position() const { return position; }
     const Geometry::Vector<3>& Velocity() const { return velocity; }
 
     bool DidCollide(const BallCollider& other) const {
         return Geometry::Vector<3>::Distance(position, other.position) < radius + other.radius;
-    }
-
-    bool DidCollide(const BrickCollider& other) const {
-        float mag = position.Magnitude();
-        if (mag < other.InnerRadius() - radius ||
-            mag > other.OuterRadius() + radius) {
-            return false;
-        }
-
-        auto dot1 = Geometry::Vector<3>::Dot(position, other.StartPoint());
-        auto projected1 = dot1 / Geometry::Vector<3>::Dot(other.StartPoint(), other.StartPoint()) * other.StartPoint();
-        auto distance1 = Geometry::Vector<3>::Distance(position, projected1);
-
-        auto side1 = position.x() * other.StartPoint().z() - position.z() * other.StartPoint().x();
-
-        auto dot2 = Geometry::Vector<3>::Dot(position, other.EndPoint());
-        auto projected2 = dot2 / Geometry::Vector<3>::Dot(other.EndPoint(), other.EndPoint()) * other.EndPoint();
-        auto distance2 = Geometry::Vector<3>::Distance(position, projected2);
-
-        auto side2 = position.x() * other.EndPoint().z() - position.z() * other.EndPoint().x();
-
-        return distance1 < radius || distance2 < radius || (side1 > 0.f && side2 < 0.f);
     }
 
     bool DidCollide(const BoundsCollider& other) const {
@@ -79,9 +55,50 @@ public:
     }
 
     void Collision(const BrickCollider& other) {
-        if (!DidCollide(other)) {
+        float mag = position.Magnitude();
+        float angleEnd = other.AngleEnd();
+
+        // Return if ball isn't inside the ring
+        if (mag > other.OuterRadius() + radius || mag < other.InnerRadius() - radius) {
             return;
         }
+
+        float positionAngle = std::atan2(position.z(), position.x());
+        Geometry::Vector<2> normal;
+        if (positionAngle > other.AngleStart()) {
+            auto minusPosition = Geometry::Vector<2>() - position.To2();
+            auto line = Geometry::Vector<2>{ cos(other.AngleStart()), sin(other.AngleStart()) };
+            auto distance = minusPosition - (Geometry::Vector<2>::Dot(minusPosition, line) * line);
+            if (distance.Magnitude() > radius) {
+                return;
+            }
+
+            normal = Geometry::Vector<2>{ sin(other.AngleStart()), -cos(other.AngleStart()) };
+        } else if (positionAngle < other.AngleEnd()) {
+            auto minusPosition = Geometry::Vector<2>() - position.To2();
+            auto line = Geometry::Vector<2>{ cos(other.AngleEnd()), sin(other.AngleEnd()) };
+            auto distance = minusPosition - (Geometry::Vector<2>::Dot(minusPosition, line) * line);
+            if (distance.Magnitude() > radius) {
+                return;
+            }
+
+            normal = Geometry::Vector<2>{ -sin(other.AngleEnd()), cos(other.AngleEnd()) };
+        } else {
+            // Ball is inside brick cone
+            normal = position.To2().Normalize();
+
+            if (mag < other.MiddleRadius()) {
+                // Collision with outer wall
+                normal.Invert();
+            }
+        }
+        auto velocity2D = velocity.To2().Invert();
+
+        // Move ball to before collision
+        position -= velocity;
+
+        // Set new velocity
+        velocity = (2.f * Geometry::Vector<2>::Dot(velocity2D, normal) * normal - velocity2D).To3();
     }
 
     void Collision(const BoundsCollider& other) {

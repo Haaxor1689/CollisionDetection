@@ -84,23 +84,23 @@ void Application::init() {
     std::uniform_real_distribution<float> pos(-15.f, 15.f);
     std::uniform_real_distribution<float> vel(-0.5f, 0.5f);
 
-    for (unsigned i = 0; i < 3; ++i) {
+    for (unsigned i = 0; i < 1; ++i) {
         balls.emplace_back(Geometry::Vector<3>{ pos(e), 1.f, pos(e) }, Geometry::Vector<3>{ vel(e), 0.f, vel(e) }, 1.f);
     }
 
     pads.emplace_back(radius * 3.f / 4.f, segments / 5.f, 0.f);
-    pads.emplace_back(radius * 3.f / 4.f, segments / 5.f, 2.f * Geometry::Pi() / 3.f);
-    pads.emplace_back(radius * 3.f / 4.f, segments / 5.f, 4.f * Geometry::Pi() / 3.f);
+    // pads.emplace_back(radius * 3.f / 4.f, segments / 5.f, 2.f * Geometry::Pi() / 3.f);
+    // pads.emplace_back(radius * 3.f / 4.f, segments / 5.f, 4.f * Geometry::Pi() / 3.f);
 
-    for (float i = 0; i < 4.f; ++i) {
-        float offset = i * 1.9f;
-        float height = i * brick_height;
-        bricks.emplace_back(radius / 4.f, segments / 6.f, 0.f + offset, height);
-        bricks.emplace_back(radius / 4.f, segments / 6.f, 2.f * Geometry::Pi() / 5.f + offset, height);
-        bricks.emplace_back(radius / 4.f, segments / 6.f, 4.f * Geometry::Pi() / 5.f + offset, height);
-        bricks.emplace_back(radius / 4.f, segments / 6.f, 6.f * Geometry::Pi() / 5.f + offset, height);
-        bricks.emplace_back(radius / 4.f, segments / 6.f, 8.f * Geometry::Pi() / 5.f + offset, height);
-    }
+    // for (float i = 0; i < 4.f; ++i) {
+    //     float offset = i * 1.9f;
+    //     float height = i * brick_height;
+    //     bricks.emplace_back(radius / 4.f, segments / 6.f, 0.f + offset, height);
+    //     bricks.emplace_back(radius / 4.f, segments / 6.f, 2.f * Geometry::Pi() / 5.f + offset, height);
+    //     bricks.emplace_back(radius / 4.f, segments / 6.f, 4.f * Geometry::Pi() / 5.f + offset, height);
+    //     bricks.emplace_back(radius / 4.f, segments / 6.f, 6.f * Geometry::Pi() / 5.f + offset, height);
+    //     bricks.emplace_back(radius / 4.f, segments / 6.f, 8.f * Geometry::Pi() / 5.f + offset, height);
+    // }
 }
 
 void Application::step() {
@@ -110,6 +110,12 @@ void Application::step() {
 
     for (auto& ball : balls) {
         ball.Collision(bounds);
+        for (auto& pad : pads) {
+            ball.Collision(pad);
+        }
+        for (auto& brick : bricks) {
+            ball.Collision(brick);
+        }
         for (auto& otherBall : balls) {
             ball.Collision(otherBall);
         }
@@ -181,7 +187,7 @@ void Application::draw_object(const Mesh& mesh, const Collisions::Collider& coll
 
         void operator()(const Collisions::BrickCollider& col) override {
             model_matrix
-                .Rotate(col.Angle(), Geometry::Vector<3>{ 0.f, 1.f, 0.f })
+                .Rotate(col.AngleStart(), Geometry::Vector<3>{ 0.f, 1.f, 0.f })
                 .Translate(Geometry::Vector<3>{ 0.f, col.Height(), 0.f });
         }
 

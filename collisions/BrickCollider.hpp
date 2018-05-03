@@ -6,54 +6,34 @@
 namespace Collisions {
 
 class BrickCollider : public Collider {
-    float innerRadius;
-    float outerRadius;
-    Geometry::Vector<3> startPoint;
-    Geometry::Vector<3> endPoint;
-
-    float angle;
+    float distance;
+    float segmentsCount;
+    float angleStart;
     float height;
 
 public:
     BrickCollider(float distance, unsigned segmentsCount, float angle = 0.f, float height = 0.f)
-        : innerRadius(distance), outerRadius{ distance + brick_width }, startPoint{ distance, 0.f, 0.f }, angle(angle), height(height) {
-        float x = distance;
-        float z = 0.f;
-        for (unsigned i = 0; i < segmentsCount; ++i)
-            rotate(x, z);
-        endPoint = { x, 0.f, z };
-    }
+        : distance(distance), segmentsCount(segmentsCount), angleStart(angle), height(height) {}
 
     // Visitors
-    void visit(ColliderVisitor& visitor) {
-        visitor(*this);
-    }
-    void visit(ConstColliderVisitor& visitor) const {
-        visitor(*this);
-    }
+    void visit(ColliderVisitor& visitor) { visitor(*this); }
+    void visit(ConstColliderVisitor& visitor) const { visitor(*this); }
 
     void Rotate(float angle) {
-        this->angle += angle;
+        angleStart += angle;
+        if (angleStart > Geometry::Pi()) {
+            angleStart -= 2 * Geometry::Pi();
+        } else if (angleStart < -Geometry::Pi()) {
+            angleStart += 2 * Geometry::Pi();
+        }
     }
 
-    float InnerRadius() const {
-        return innerRadius;
-    }
-    float OuterRadius() const {
-        return outerRadius;
-    }
-    const Geometry::Vector<3>& StartPoint() const {
-        return startPoint;
-    }
-    const Geometry::Vector<3>& EndPoint() const {
-        return endPoint;
-    }
-    float Angle() const {
-        return angle;
-    }
-    float Height() const {
-        return height;
-    }
+    float InnerRadius() const { return distance; }
+    float OuterRadius() const { return distance + brick_width; }
+    float MiddleRadius() const { return distance + brick_width / 2.f; }
+    float AngleStart() const { return angleStart; }
+    float AngleEnd() const { return angleStart + segmentsCount * angle; }
+    float Height() const { return height; }
 };
 
 } // namespace Collisions
