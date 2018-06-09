@@ -12,25 +12,25 @@ enum class ShaderCompilationStatus {
 class Shader {
 public:
     Shader() = delete;
-    Shader(const std::string& file_name) {}
-    virtual ~Shader() { glDeleteShader(this->shader_id); }
+    Shader(const std::string& fileName) {}
+    virtual ~Shader() { glDeleteShader(this->shaderId); }
 
-    ShaderCompilationStatus get_compilation_status();
-    const std::string get_log();
-    GLuint get_id() { return shader_id; }
+    ShaderCompilationStatus GetCompilationStatus() const;
+    std::string GetLog() const;
+    GLuint GetId() const { return shaderId; }
 
 protected:
-    GLuint shader_id = 0;
+    GLuint shaderId = 0;
 };
 
 class VertexShader : public Shader {
 public:
     VertexShader() = delete;
-    VertexShader(const std::string& file_name);
+    VertexShader(const std::string& fileName);
 };
 
 class FragmentShader : public Shader {
 public:
     FragmentShader() = delete;
-    FragmentShader(const std::string& file_name);
+    FragmentShader(const std::string& fileName);
 };

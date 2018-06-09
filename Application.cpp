@@ -16,38 +16,40 @@
 #include "nuklear_glfw_gl3.h"
 
 #include "Geometry"
+#include <texture.hpp>
 
 using namespace std;
 
-void Application::init() {
+void Application::Init() {
     // Create shader program
     program = make_unique<ShaderProgram>("shaders/main.vert", "shaders/main.frag");
 
     // Get locations of vertex attributes position and normal
-    GLint position_loc = program->get_attribute_location("position");
-    GLint normal_loc = program->get_attribute_location("normal");
-    GLint tex_coord_loc = program->get_attribute_location("tex_coord");
+    const GLint positionLoc = program->GetAttributeLocation("position");
+    const GLint normalLoc = program->GetAttributeLocation("normal");
+    const GLint texCoordLoc = program->GetAttributeLocation("tex_coord");
 
     // Get locations of uniforms for positioning and projecting object
-    model_matrix_loc = program->get_uniform_location("model_matrix");
-    view_matrix_loc = program->get_uniform_location("view_matrix");
-    projection_matrix_loc = program->get_uniform_location("projection_matrix");
+    modelMatrixLoc = program->GetUniformLocation("model_matrix");
+    viewMatrixLoc = program->GetUniformLocation("view_matrix");
+    projectionMatrixLoc = program->GetUniformLocation("projection_matrix");
 
-    light_position_loc = program->get_uniform_location("light_position");
-    eye_position_loc = program->get_uniform_location("eye_position");
-    light_ambient_color_loc = program->get_uniform_location("light_ambient_color");
-    light_diffuse_color_loc = program->get_uniform_location("light_diffuse_color");
-    light_specular_color_loc = program->get_uniform_location("light_specular_color");
+    lightPositionLoc = program->GetUniformLocation("light_position");
+    eyePositionLoc = program->GetUniformLocation("eye_position");
+    lightAmbientColorLoc = program->GetUniformLocation("light_ambient_color");
+    lightDiffuseColorLoc = program->GetUniformLocation("light_diffuse_color");
+    lightSpecularColorLoc = program->GetUniformLocation("light_specular_color");
 
-    material_ambient_color_loc = program->get_uniform_location("material_ambient_color");
-    material_diffuse_color_loc = program->get_uniform_location("material_diffuse_color");
-    material_specular_color_loc = program->get_uniform_location("material_specular_color");
-    material_shininess_loc = program->get_uniform_location("material_shininess");
+    materialAmbientColorLoc = program->GetUniformLocation("material_ambient_color");
+    materialDiffuseColorLoc = program->GetUniformLocation("material_diffuse_color");
+    materialSpecularColorLoc = program->GetUniformLocation("material_specular_color");
+    materialShininessLoc = program->GetUniformLocation("material_shininess");
 
-    obj_texture_loc = program->get_uniform_location("obj_texture");
+    objTextureLoc = program->GetUniformLocation("obj_texture");
 
-    auto load_and_set_texture = [](const std::string& name, GLuint& pos) {
-        pos = load_texture_2d("images/" + name + ".png");
+    const auto loadAndSetTexture = [](const std::string& name, GLuint& pos)
+    {
+        pos = Texture::LoadTexture2D("images/" + name + ".png");
         glBindTexture(GL_TEXTURE_2D, pos);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -55,54 +57,54 @@ void Application::init() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     };
 
-    load_and_set_texture("bricks", t_bricks);
-    load_and_set_texture("glass", t_glass);
-    load_and_set_texture("roof", t_roof);
-    load_and_set_texture("rune", t_rune);
-    load_and_set_texture("wood", t_wood);
+    loadAndSetTexture("bricks", tBricks);
+    loadAndSetTexture("glass", tGlass);
+    loadAndSetTexture("roof", tRoof);
+    loadAndSetTexture("rune", tRune);
+    loadAndSetTexture("wood", tWood);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    cube.create_vao(position_loc, normal_loc, tex_coord_loc);
-    sphere.create_vao(position_loc, normal_loc, tex_coord_loc);
-    ground.create_vao(position_loc, normal_loc, tex_coord_loc);
-    pad.create_vao(position_loc, normal_loc, tex_coord_loc);
-    brick.create_vao(position_loc, normal_loc, tex_coord_loc);
+    cube.CreateVao(positionLoc, normalLoc, texCoordLoc);
+    sphere.CreateVao(positionLoc, normalLoc, texCoordLoc);
+    ground.CreateVao(positionLoc, normalLoc, texCoordLoc);
+    pad.CreateVao(positionLoc, normalLoc, texCoordLoc);
+    brick.CreateVao(positionLoc, normalLoc, texCoordLoc);
 
-    cube.set_texture(t_roof);
-    sphere.set_texture(t_glass);
-    ground.set_texture(t_bricks);
-    pad.set_texture(t_wood);
-    brick.set_texture(t_rune);
+    cube.SetTexture(tRoof);
+    sphere.SetTexture(tGlass);
+    ground.SetTexture(tBricks);
+    pad.SetTexture(tWood);
+    brick.SetTexture(tRune);
 
     // Nuklear
-    ctx = nk_glfw3_init(window.get_window(), NK_GLFW3_INSTALL_CALLBACKS);
+    ctx = nk_glfw3_init(Window.GetWindow(), NK_GLFW3_INSTALL_CALLBACKS);
     nk_glfw3_font_stash_begin(&atlas);
     nk_glfw3_font_stash_end();
 
     // Objects
     std::random_device r;
     std::default_random_engine e(r());
-    std::uniform_real_distribution<float> pos(-15.f, 15.f);
-    std::uniform_real_distribution<float> vel(-0.5f, 0.5f);
+    const std::uniform_real_distribution<float> pos(-15.f, 15.f);
+    const std::uniform_real_distribution<float> vel(-0.5f, 0.5f);
 
-    for (unsigned i = 0; i < 3; ++i) {
-        balls.emplace_back(Geometry::Vector<3>{ pos(e), 1.f, pos(e) }, Geometry::Vector<3>{ vel(e), 0.f, vel(e) }, 1.f);
-    }
+    // for (unsigned i = 0; i < 3; ++i) {
+    balls.emplace_back(Geometry::Vector<3>{ pos(e), 1.f, pos(e) }, Geometry::Vector<3>{ vel(e), 0.f, vel(e) }, 1.f);
+    // }
 
     pads.emplace_back(pad_distance, pad_segments, 0.f);
-    pads.emplace_back(pad_distance, pad_segments, 2.f * Geometry::Pi / 3.f);
-    pads.emplace_back(pad_distance, pad_segments, 4.f * Geometry::Pi / 3.f);
+    pads.emplace_back(pad_distance, pad_segments, 2.f * Geometry::pi / 3.f);
+    pads.emplace_back(pad_distance, pad_segments, 4.f * Geometry::pi / 3.f);
 
-    for (float i = 0; i < 4.f; ++i) {
-        float offset = i * 1.9f;
-        float height = i * brick_height;
-        for (int j = 0; j < 8; ++j) {
-            bricks.emplace_back(brick_distance, brick_segments, 2.f * j * Geometry::Pi / 8.f + offset, height);
-        }
-    }
+    // for (float i = 0; i < 4.f; ++i) {
+    //     float offset = i * 1.9f;
+    //     float height = i * brick_height;
+    //     for (int j = 0; j < 8; ++j) {
+    //         bricks.emplace_back(brick_distance, brick_segments, 2.f * j * Geometry::Pi / 8.f + offset, height);
+    //     }
+    // }
 }
 
-void Application::step() {
+void Application::Step() {
     for (auto& ball : balls) {
         ball.Step();
     }
@@ -125,84 +127,88 @@ void Application::step() {
     }
 }
 
-void Application::render() {
+void Application::Render() {
     nk_glfw3_new_frame();
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClearDepth(1.0);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
-    program->use();
+    program->Use();
 
     // Get the current time
-    float app_time = float(glfwGetTime());
+    const auto appTime = float(glfwGetTime());
 
     // Get the aspect ratio of window size
-    float width = float(window.get_width());
-    float height = float(window.get_height());
-    float aspect_ratio = width / height;
+    const auto width = float(Window.GetWidth());
+    const auto height = float(Window.GetHeight());
+    const auto aspectRatio = width / height;
 
     // Clear screen, both color and depth
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Set cameras projection and view matrices and eye location
-    auto projection_matrix = Geometry::Perspective(45.0f, aspect_ratio, 1.f, 200.0f);
-    auto view_matrix = Geometry::LookAt(camera.get_eye_position(), Geometry::Vector<3>(), { 0.0f, 1.0f, 0.0f });
+    const auto projectionMatrix = Geometry::Perspective(45.0f, aspectRatio, 1.f, 200.0f);
+    const auto viewMatrix = LookAt(camera.GetEyePosition(), Geometry::Vector<3>(), { 0.0f, 1.0f, 0.0f });
 
-    glUniformMatrix4fv(projection_matrix_loc, 1, GL_FALSE, &projection_matrix);
-    glUniformMatrix4fv(view_matrix_loc, 1, GL_FALSE, &view_matrix);
-    glUniform3fv(eye_position_loc, 1, &camera.get_eye_position());
+    glUniformMatrix4fv(projectionMatrixLoc, 1, GL_FALSE, &projectionMatrix);
+    glUniformMatrix4fv(viewMatrixLoc, 1, GL_FALSE, &viewMatrix);
+    glUniform3fv(eyePositionLoc, 1, &camera.GetEyePosition());
 
     // Set light
-    auto light_pos = Geometry::Vector<3>{ 5.f / 4.f + 0.75f, 1.f, 0.f }.Rotate(app_time, { 0.f, 1.f, 0.f });
-    glUniform4f(light_position_loc, light_pos.x(), light_pos.y(), light_pos.z(), 0.f);
+    auto lightPos = Geometry::Vector<3>{ 5.f / 4.f + 0.75f, 1.f, 0.f }.Rotate(appTime, { 0.f, 1.f, 0.f });
+    glUniform4f(lightPositionLoc, lightPos.X(), lightPos.Y(), lightPos.Z(), 0.f);
 
     // Colors
-    glUniform3f(light_ambient_color_loc, 0.1f, 0.1f, 0.1f);
-    glUniform3f(light_diffuse_color_loc, 1.0f, 1.0f, 1.0f);
-    glUniform3f(light_specular_color_loc, 1.0f, 1.0f, 1.0f);
+    glUniform3f(lightAmbientColorLoc, 0.1f, 0.1f, 0.1f);
+    glUniform3f(lightDiffuseColorLoc, 1.0f, 1.0f, 1.0f);
+    glUniform3f(lightSpecularColorLoc, 1.0f, 1.0f, 1.0f);
 
     // Materials
-    glUniform3f(material_ambient_color_loc, 1.0f, 1.0f, 1.0f);
-    glUniform3f(material_diffuse_color_loc, 1.0f, 1.0f, 1.0f);
-    glUniform3f(material_specular_color_loc, 1.0f, 1.0f, 1.0f);
-    glUniform1f(material_shininess_loc, 200.0f);
+    glUniform3f(materialAmbientColorLoc, 1.0f, 1.0f, 1.0f);
+    glUniform3f(materialDiffuseColorLoc, 1.0f, 1.0f, 1.0f);
+    glUniform3f(materialSpecularColorLoc, 1.0f, 1.0f, 1.0f);
+    glUniform1f(materialShininessLoc, 200.0f);
 
     // Texture
-    glUniform1i(obj_texture_loc, 0);
+    glUniform1i(objTextureLoc, 0);
     glActiveTexture(GL_TEXTURE0);
 
     // Model matrix
-    auto model_matrix = Geometry::Matrix<4>::Identity();
-    glUniformMatrix4fv(model_matrix_loc, 1, GL_FALSE, &model_matrix);
+    const auto modelMatrix = Geometry::Matrix<4>::Identity();
+    glUniformMatrix4fv(modelMatrixLoc, 1, GL_FALSE, &modelMatrix);
 
-    ground.draw();
+    ground.Draw();
 
     for (auto& ball : balls) {
-        draw_object(sphere, ball);
+        DrawObject(sphere, ball);
     }
 
-    for (auto& pad_col : pads) {
-        draw_object(pad, pad_col);
+    for (auto& padCol : pads) {
+        DrawObject(pad, padCol);
     }
 
-    for (auto& brick_col : bricks) {
-        draw_object(brick, brick_col);
+    for (auto& brickCol : bricks) {
+        DrawObject(brick, brickCol);
     }
 
     nk_glfw3_render(NK_ANTI_ALIASING_ON, 512 * 1024, 128 * 1024);
 }
 
-void Application::gui() {
+void Application::Gui() {
     if (nk_begin(ctx, "Debug", nk_rect(10, 10, 230, 400), NK_WINDOW_TITLE | NK_WINDOW_BORDER)) {
         nk_layout_row_dynamic(ctx, 32, 1);
         nk_label(ctx, "Ball", NK_TEXT_LEFT);
         auto ballPosition = balls[0].Position();
-        auto ballAngle = Geometry::Degrees(std::atan2(ballPosition.z(), ballPosition.x()));
+        const auto ballAngle = Geometry::Degrees(std::atan2(ballPosition.Z(), ballPosition.X()));
 
         nk_layout_row_static(ctx, 26, 100, 2);
         nk_label(ctx, "Position: ", NK_TEXT_LEFT);
-        nk_label(ctx, ("[" + std::to_string(static_cast<int>(ballPosition.x())) + ", " + std::to_string(static_cast<int>(ballPosition.z())) + "]").c_str(), NK_TEXT_LEFT);
+        nk_label(ctx, ("[" + Geometry::ToString(ballPosition.X(), 2) + ", " + Geometry::ToString(ballPosition.Z(), 2) + "]").c_str(), NK_TEXT_LEFT);
+
+        nk_layout_row_static(ctx, 26, 100, 2);
+        nk_label(ctx, "Velocity: ", NK_TEXT_LEFT);
+        nk_label(ctx, ("[" + Geometry::ToString(balls[0].Velocity().X(), 2) + ", " + Geometry::ToString(balls[0].Velocity().Z(), 2) + "]").c_str(), NK_TEXT_LEFT);
 
         nk_layout_row_static(ctx, 26, 100, 2);
         nk_label(ctx, "Distance: ", NK_TEXT_LEFT);
@@ -214,8 +220,8 @@ void Application::gui() {
 
         nk_layout_row_dynamic(ctx, 32, 1);
         nk_label(ctx, "Pad", NK_TEXT_LEFT);
-        float startAngle = Geometry::Degrees(pads[0].AngleStart());
-        float endAngle = Geometry::Degrees(pads[0].AngleEnd());
+        const auto startAngle = Geometry::Degrees(pads[0].AngleStart());
+        const auto endAngle = Geometry::Degrees(pads[0].AngleEnd());
 
         nk_layout_row_static(ctx, 26, 100, 2);
         nk_label(ctx, "Distance: ", NK_TEXT_LEFT);
@@ -232,40 +238,41 @@ void Application::gui() {
     nk_end(ctx);
 }
 
-void Application::draw_object(const Mesh& mesh, const Collisions::Collider& collider) {
-    auto model_matrix = Geometry::Matrix<4>::Identity();
+void Application::DrawObject(const Mesh& mesh, const Collisions::Collider& collider) const {
+    auto modelMatrix = Geometry::Matrix<4>::Identity();
     class Visitor : public Collisions::ConstColliderVisitor {
     public:
-        explicit Visitor(Geometry::Matrix<4>& model_matrix)
-            : model_matrix(model_matrix) {}
+        explicit Visitor(Geometry::Matrix<4>& modelMatrix)
+            : ModelMatrix(modelMatrix) {}
 
         void operator()(const Collisions::BallCollider& col) override {
-            model_matrix.Translate(col.Position());
+            ModelMatrix.Translate(col.Position());
         }
 
         void operator()(const Collisions::BrickCollider& col) override {
-            model_matrix
-                .Rotate(-col.AngleStart(), Geometry::Vector<3>{ 0.f, 1.f, 0.f })
-                .Translate(Geometry::Vector<3>{ 0.f, col.Height(), 0.f });
+            ModelMatrix
+                    .Rotate(-col.AngleStart(), Geometry::Vector<3>{ 0.f, 1.f, 0.f })
+                    .Translate(Geometry::Vector<3>{ 0.f, col.Height(), 0.f });
         }
 
-        Geometry::Matrix<4>& model_matrix;
-        bool stopThere = false;
-    } visitor{ model_matrix };
-    collider.visit(visitor);
+        Geometry::Matrix<4>& ModelMatrix;
+        bool StopThere = false;
+    } visitor{ modelMatrix };
+    collider.Visit(visitor);
 
-    glUniformMatrix4fv(model_matrix_loc, 1, GL_FALSE, &model_matrix);
-    mesh.draw();
+    glUniformMatrix4fv(modelMatrixLoc, 1, GL_FALSE, &modelMatrix);
+    mesh.Draw();
 }
 
-void Application::on_mouse_position(double x, double y) {
-    camera.on_mouse_move(x, y);
-}
-void Application::on_mouse_button(int button, int action, int mods) {
-    camera.on_mouse_button(button, action, mods);
+void Application::OnMousePosition(double x, double y) {
+    camera.OnMouseMove(x, y);
 }
 
-void Application::on_key(int key, int scancode, int actions, int mods) {
+void Application::OnMouseButton(int button, int action, int mods) {
+    camera.OnMouseButton(button, action, mods);
+}
+
+void Application::OnKey(int key, int scancode, int actions, int mods) {
     switch (key) {
     case GLFW_KEY_L:
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -275,22 +282,23 @@ void Application::on_key(int key, int scancode, int actions, int mods) {
         return;
     case GLFW_KEY_A:
         if (actions == GLFW_PRESS) {
-            movement -= movement_speed;
+            movement -= movementSpeed;
         } else if (actions == GLFW_RELEASE) {
-            movement += movement_speed;
+            movement += movementSpeed;
         }
         return;
     case GLFW_KEY_D:
         if (actions == GLFW_PRESS) {
-            movement += movement_speed;
+            movement += movementSpeed;
         } else if (actions == GLFW_RELEASE) {
-            movement -= movement_speed;
+            movement -= movementSpeed;
         }
-        return;
+    default:
+        break;
     }
 }
 
-void Application::on_resize(int width, int height) {
-    window.resize(width, height);
+void Application::OnResize(int width, int height) {
+    Window.Resize(width, height);
     glViewport(0, 0, width, height);
 }

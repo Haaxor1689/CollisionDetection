@@ -2,5 +2,4 @@
 
 #include "include/Vector.hpp"
 #include "include/Matrix.hpp"
-#include "include/Ray.hpp"
 #include "include/Utility.hpp"

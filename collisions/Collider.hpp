@@ -7,8 +7,8 @@ namespace Collisions {
 struct Collider {
     virtual ~Collider() = default;
 
-    virtual void visit(ColliderVisitor& visitor) = 0;
-    virtual void visit(ConstColliderVisitor& visitor) const = 0;
+    virtual void Visit(ColliderVisitor& visitor) = 0;
+    virtual void Visit(ConstColliderVisitor& visitor) const = 0;
 };
 
 } // namespace Collisions

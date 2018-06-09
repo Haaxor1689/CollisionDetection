@@ -7,28 +7,28 @@
 
 class Window {
 public:
-    Window(int initial_width, int initial_height, const std::string& title);
+    Window(int initialWidth, int initialHeight, const std::string& title);
     ~Window();
 
-    void set_user_pointer(void* pointer);
+    void SetUserPointer(void* pointer) const;
 
-    void set_pos_callback(GLFWwindowposfun function);
-    void set_size_callback(GLFWwindowsizefun function);
-    void set_close_callback(GLFWwindowclosefun function);
+    void SetPosCallback(GLFWwindowposfun function) const;
+    void SetSizeCallback(GLFWwindowsizefun function) const;
+    void SetCloseCallback(GLFWwindowclosefun function) const;
 
-    void set_key_callback(GLFWkeyfun function);
-    void set_mouse_position_callback(GLFWcursorposfun function);
-    void set_mouse_button_callback(GLFWmousebuttonfun function);
+    void SetKeyCallback(GLFWkeyfun function) const;
+    void SetMousePositionCallback(GLFWcursorposfun function) const;
+    void SetMouseButtonCallback(GLFWmousebuttonfun function) const;
 
-    bool should_close();
-    void swap_buffers();
-    void poll_events();
+    bool ShouldClose() const;
+    void SwapBuffers() const;
+    void PollEvents();
 
-    void resize(int width, int height);
+    void Resize(int width, int height);
 
-    int get_width() { return width; }
-    int get_height() { return height; }
-    GLFWwindow* get_window() { return window; }
+    int GetWidth() const { return width; }
+    int GetHeight() const { return height; }
+    GLFWwindow* GetWindow() const { return window; }
 
 private:
     int width;

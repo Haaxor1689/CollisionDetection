@@ -8,7 +8,7 @@
 const unsigned segments = 36;
 const float radius = 40.f;
 
-const float angle = -2 * Geometry::Pi / float(segments);
+const float angle = -2 * Geometry::pi / float(segments);
 const float s = sinf(angle);
 const float c = cosf(angle);
 

@@ -9,62 +9,62 @@
 
 class Mesh {
 public:
-    Mesh(const std::string& file_name, GLint position_location = -1, GLint normal_location = -1,
-         GLint tex_coord_location = -1);
+    Mesh(const std::string& fileName, GLint positionLocation = -1, GLint normalLocation = -1,
+         GLint texCoordLocation = -1);
 
     Mesh(std::vector<float> vertices, std::vector<uint32_t> indices, GLenum mode = GL_TRIANGLES,
-         GLint position_location = -1, GLint normal_location = -1, GLint tex_coord_location = -1)
-        : Mesh(vertices, std::vector<float>(), std::vector<float>(), indices, mode, position_location, normal_location,
-               tex_coord_location) {}
+         GLint positionLocation = -1, GLint normalLocation = -1, GLint texCoordLocation = -1)
+        : Mesh(vertices, std::vector<float>(), std::vector<float>(), indices, mode, positionLocation, normalLocation,
+               texCoordLocation) {}
 
     Mesh(std::vector<float> vertices, std::vector<float> normals, std::vector<uint32_t> indices,
-         GLenum mode = GL_TRIANGLES, GLint position_location = -1, GLint normal_location = -1,
-         GLint tex_coord_location = -1)
-        : Mesh(vertices, normals, std::vector<float>(), indices, mode, position_location, normal_location,
-               tex_coord_location) {}
+         GLenum mode = GL_TRIANGLES, GLint positionLocation = -1, GLint normalLocation = -1,
+         GLint texCoordLocation = -1)
+        : Mesh(vertices, normals, std::vector<float>(), indices, mode, positionLocation, normalLocation,
+               texCoordLocation) {}
 
-    Mesh(std::vector<float> vertices, std::vector<float> normals, std::vector<float> tex_coords,
-         std::vector<uint32_t> indices, GLenum mode = GL_TRIANGLES, GLint position_location = -1,
-         GLint normal_location = -1, GLint tex_coord_location = -1);
+    Mesh(std::vector<float> vertices, std::vector<float> normals, std::vector<float> texCoords,
+         std::vector<uint32_t> indices, GLenum mode = GL_TRIANGLES, GLint positionLocation = -1,
+         GLint normalLocation = -1, GLint texCoordLocation = -1);
 
     Mesh(const Mesh& other);
 
-    void create_vao(GLint position_location = -1, GLint normal_location = -1, GLint tex_coord_location = -1);
-    void set_texture(GLuint texture_id) { texture = texture_id; }
-    GLuint get_vao_id() const { return this->vao_id; }
-    void bind_vao() const { glBindVertexArray(this->vao_id); }
+    void CreateVao(GLint positionLocation = -1, GLint normalLocation = -1, GLint texCoordLocation = -1);
+    void SetTexture(GLuint textureId) { texture = textureId; }
+    GLuint GetVaoId() const { return this->vaoId; }
+    void BindVao() const { glBindVertexArray(this->vaoId); }
 
-    void draw() const;
+    void Draw() const;
 
-    static Mesh from_interleaved(std::vector<float> interleaved_vertices, std::vector<uint32_t> indices,
-                                 GLenum mode = GL_TRIANGLES, GLint position_location = -1, GLint normal_location = -1,
-                                 GLint tex_coord_location = -1);
+    static Mesh FromInterleaved(std::vector<float> interleavedVertices, std::vector<uint32_t> indices,
+                                 GLenum mode = GL_TRIANGLES, GLint positionLocation = -1, GLint normalLocation = -1,
+                                 GLint texCoordLocation = -1);
 
-    static std::vector<Mesh> from_file(const std::string& file_name, GLint position_location = -1,
-                                       GLint normal_location = -1, GLint tex_coord_location = -1);
+    static std::vector<Mesh> FromFile(const std::string& fileName, GLint positionLocation = -1,
+                                       GLint normalLocation = -1, GLint texCoordLocation = -1);
 
-    static Mesh cube(GLint position_location = -1, GLint normal_location = -1, GLint tex_coord_location = -1);
-    static Mesh sphere(GLint position_location = -1, GLint normal_location = -1, GLint tex_coord_location = -1);
-    static Mesh ground(GLint position_location = -1, GLint normal_location = -1, GLint tex_coord_location = -1);
-    static Mesh pad(GLint position_location = -1, GLint normal_location = -1, GLint tex_coord_location = -1);
-    static Mesh brick(GLint position_location = -1, GLint normal_location = -1, GLint tex_coord_location = -1);
+    static Mesh Cube(GLint positionLocation = -1, GLint normalLocation = -1, GLint texCoordLocation = -1);
+    static Mesh Sphere(GLint positionLocation = -1, GLint normalLocation = -1, GLint texCoordLocation = -1);
+    static Mesh Ground(GLint positionLocation = -1, GLint normalLocation = -1, GLint texCoordLocation = -1);
+    static Mesh Pad(GLint positionLocation = -1, GLint normalLocation = -1, GLint texCoordLocation = -1);
+    static Mesh Brick(GLint positionLocation = -1, GLint normalLocation = -1, GLint texCoordLocation = -1);
 
     ~Mesh();
 
 private:
-    GLuint vao_id = 0;
+    GLuint vaoId = 0;
 
-    size_t vertices_count = 0;
-    GLuint vertices_buffer_id = 0;
-    GLuint normals_buffer_id = 0;
-    GLuint tex_coords_buffer_id = 0;
+    size_t verticesCount = 0;
+    GLuint verticesBufferId = 0;
+    GLuint normalsBufferId = 0;
+    GLuint texCoordsBufferId = 0;
 
-    size_t indices_count = 0;
-    GLuint indices_buffer_id = 0;
+    size_t indicesCount = 0;
+    GLuint indicesBufferId = 0;
 
-    GLint position_location = -1;
-    GLint normal_location = -1;
-    GLint tex_coord_location = -1;
+    GLint positionLocation = -1;
+    GLint normalLocation = -1;
+    GLint texCoordLocation = -1;
 
     GLenum mode = GL_TRIANGLES;
 

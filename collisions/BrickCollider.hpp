@@ -16,15 +16,15 @@ public:
         : distance(distance), segmentsCount(segmentsCount), angleStart(angle), height(height) {}
 
     // Visitors
-    void visit(ColliderVisitor& visitor) { visitor(*this); }
-    void visit(ConstColliderVisitor& visitor) const { visitor(*this); }
+    void Visit(ColliderVisitor& visitor) override { visitor(*this); }
+    void Visit(ConstColliderVisitor& visitor) const override { visitor(*this); }
 
     void Rotate(float angle) {
         angleStart += angle;
-        if (angleStart > Geometry::Pi) {
-            angleStart -= 2 * Geometry::Pi;
-        } else if (angleStart < -Geometry::Pi) {
-            angleStart += 2 * Geometry::Pi;
+        if (angleStart > Geometry::pi) {
+            angleStart -= 2 * Geometry::pi;
+        } else if (angleStart < -Geometry::pi) {
+            angleStart += 2 * Geometry::pi;
         }
     }
 

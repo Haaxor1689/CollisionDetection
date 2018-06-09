@@ -13,7 +13,7 @@ class Row {
     T* data;
     size_t x;
 
-    template <size_t w>
+    template <size_t W>
     friend class Matrix;
     Row(T* data, size_t x)
         : data(data), x(x) {}
@@ -215,10 +215,10 @@ inline int Matrix<2>::Determinant() const {
 
 template <>
 inline Matrix<4>& Matrix<4>::Translate(const Vector<3>& dimensions) {
-    Matrix translation = Matrix::Identity();
-    translation[0][3] = dimensions.x();
-    translation[1][3] = dimensions.y();
-    translation[2][3] = dimensions.z();
+    Matrix translation = Identity();
+    translation[0][3] = dimensions.X();
+    translation[1][3] = dimensions.Y();
+    translation[2][3] = dimensions.Z();
     return *this = *this * translation;
 }
 
@@ -230,7 +230,7 @@ inline Matrix<4>& Matrix<4>::Rotate(float angle, Vector<3> axis) {
     axis.Normalize();
     Vector<3> temp = axis * (1.f - c);
 
-    Matrix rotation = Matrix::Identity();
+    Matrix rotation = Identity();
     rotation[0][0] = c + temp[0] * axis[0];
     rotation[1][0] = temp[0] * axis[1] + s * axis[2];
     rotation[2][0] = temp[0] * axis[2] - s * axis[1];
@@ -248,10 +248,10 @@ inline Matrix<4>& Matrix<4>::Rotate(float angle, Vector<3> axis) {
 
 template <>
 inline Matrix<4>& Matrix<4>::Scale(const Vector<3>& dimensions) {
-    Matrix scale = Matrix::Identity();
-    scale[0][0] = dimensions.x();
-    scale[1][1] = dimensions.y();
-    scale[2][2] = dimensions.z();
+    Matrix scale = Identity();
+    scale[0][0] = dimensions.X();
+    scale[1][1] = dimensions.Y();
+    scale[2][2] = dimensions.Z();
     return *this = *this * scale;
 }
 } // namespace Geometry

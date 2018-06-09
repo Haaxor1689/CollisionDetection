@@ -74,7 +74,6 @@ set(FRAMEWORK_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/framework/include")
 set(FRAMEWORK_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/framework/src")
 add_library(framework
 	"${FRAMEWORK_SRC_DIR}/window.cpp"
-	"${FRAMEWORK_SRC_DIR}/utility.cpp"
 	"${FRAMEWORK_SRC_DIR}/shader.cpp"
 	"${FRAMEWORK_SRC_DIR}/program.cpp"
 	"${FRAMEWORK_SRC_DIR}/mesh.cpp"

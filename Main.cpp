@@ -1,6 +1,5 @@
 #include <fstream>
 #include <iostream>
-#include <istream>
 #include <memory>
 
 #include "Application.hpp"
@@ -23,7 +22,7 @@ int main(void) {
     }
 
     try {
-        application->init();
+        application->Init();
     } catch (std::string error) {
         std::cout << error << std::endl;
 
@@ -33,12 +32,12 @@ int main(void) {
     }
 
     // Loop
-    while (!application->window.should_close()) {
-        application->step();
-        application->gui();
-        application->render();
-        application->window.swap_buffers();
-        application->window.poll_events();
+    while (!application->Window.ShouldClose()) {
+        application->Step();
+        application->Gui();
+        application->Render();
+        application->Window.SwapBuffers();
+        application->Window.PollEvents();
     }
 
     // Free the entire application before terminating glfw. If this were done in the wrong order

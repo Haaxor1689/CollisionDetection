@@ -12,8 +12,8 @@ public:
         : radius(radius) {}
 
     // Visitors
-    void visit(ColliderVisitor& visitor) { visitor(*this); }
-    void visit(ConstColliderVisitor& visitor) const { visitor(*this); }
+    void Visit(ColliderVisitor& visitor) override { visitor(*this); }
+    void Visit(ConstColliderVisitor& visitor) const override { visitor(*this); }
 };
 
 } // namespace Collisions

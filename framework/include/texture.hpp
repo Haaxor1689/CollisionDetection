@@ -3,7 +3,9 @@
 #include <glad/glad.h>
 #include <string>
 
-const GLenum cubemap_sides[6] = {
+namespace Texture {
+
+const GLenum cubemapSides[6] = {
     GL_TEXTURE_CUBE_MAP_POSITIVE_X,
     GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
     GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
@@ -12,5 +14,7 @@ const GLenum cubemap_sides[6] = {
     GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
 };
 
-GLuint load_texture_2d(const std::string& filename);
-GLuint load_texture_cubemap(std::string filenames[6]);
+GLuint LoadTexture2D(const std::string& filename);
+GLuint LoadTextureCubemap(std::string filenames[6]);
+
+}

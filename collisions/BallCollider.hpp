@@ -12,15 +12,15 @@ class BallCollider : public Collider {
     Geometry::Vector<3> velocity;
 
 public:
-    const float radius;
-    const float mass;
+    const float Radius;
+    const float Mass;
 
     BallCollider(Geometry::Vector<3>&& position, Geometry::Vector<3>&& velocity, float radius)
-        : position(std::move(position)), velocity(std::move(velocity)), radius(radius), mass(4 * Geometry::Pi * radius * radius * radius * 11.34f / 3) {}
+        : position(std::move(position)), velocity(std::move(velocity)), Radius(radius), Mass(4 * Geometry::pi * radius * radius * radius * 11.34f / 3) {}
 
     // Visitors
-    void visit(ColliderVisitor& visitor) { visitor(*this); }
-    void visit(ConstColliderVisitor& visitor) const { visitor(*this); }
+    void Visit(ColliderVisitor& visitor) override { visitor(*this); }
+    void Visit(ConstColliderVisitor& visitor) const override { visitor(*this); }
 
     void Step() { position += velocity; }
 
@@ -28,11 +28,11 @@ public:
     const Geometry::Vector<3>& Velocity() const { return velocity; }
 
     bool DidCollide(const BallCollider& other) const {
-        return Geometry::Vector<3>::Distance(position, other.position) < radius + other.radius;
+        return Geometry::Vector<3>::Distance(position, other.position) < Radius + other.Radius;
     }
 
     bool DidCollide(const BoundsCollider& other) const {
-        return position.Magnitude() > other.radius - radius;
+        return position.Magnitude() > other.radius - Radius;
     }
 
     void Collision(BallCollider& other) {
@@ -40,10 +40,10 @@ public:
             return;
         }
 
-        float newVelX1 = (velocity.x() * (mass - other.mass) + (2 * other.mass * other.velocity.x())) / (mass + other.mass);
-        float newVelZ1 = (velocity.z() * (mass - other.mass) + (2 * other.mass * other.velocity.z())) / (mass + other.mass);
-        float newVelX2 = (other.velocity.x() * (other.mass - mass) + (2 * mass * velocity.x())) / (mass + other.mass);
-        float newVelZ2 = (other.velocity.z() * (other.mass - mass) + (2 * mass * velocity.z())) / (mass + other.mass);
+        float newVelX1 = (velocity.X() * (Mass - other.Mass) + (2 * other.Mass * other.velocity.X())) / (Mass + other.Mass);
+        float newVelZ1 = (velocity.Z() * (Mass - other.Mass) + (2 * other.Mass * other.velocity.Z())) / (Mass + other.Mass);
+        float newVelX2 = (other.velocity.X() * (other.Mass - Mass) + (2 * Mass * velocity.X())) / (Mass + other.Mass);
+        float newVelZ2 = (other.velocity.Z() * (other.Mass - Mass) + (2 * Mass * velocity.Z())) / (Mass + other.Mass);
 
         // Move balls to before collision
         position -= velocity;
@@ -58,17 +58,17 @@ public:
         float mag = position.Magnitude();
 
         // Return if ball isn't inside the ring
-        if (mag > other.OuterRadius() + radius || mag < other.InnerRadius() - radius) {
+        if (mag > other.OuterRadius() + Radius || mag < other.InnerRadius() - Radius) {
             return;
         }
 
-        float positionAngle = std::atan2(position.z(), position.x());
+        const float positionAngle = std::atan2(position.Z(), position.X());
         Geometry::Vector<2> normal;
         if (positionAngle > other.AngleStart()) {
             auto minusPosition = Geometry::Vector<2>() - position.To2();
             auto line = Geometry::Vector<2>{ cos(other.AngleStart()), sin(other.AngleStart()) };
             auto distance = minusPosition - (Geometry::Vector<2>::Dot(minusPosition, line) * line);
-            if (distance.Magnitude() > radius) {
+            if (distance.Magnitude() > Radius) {
                 return;
             }
 
@@ -77,7 +77,7 @@ public:
             auto minusPosition = Geometry::Vector<2>() - position.To2();
             auto line = Geometry::Vector<2>{ cos(other.AngleEnd()), sin(other.AngleEnd()) };
             auto distance = minusPosition - (Geometry::Vector<2>::Dot(minusPosition, line) * line);
-            if (distance.Magnitude() > radius) {
+            if (distance.Magnitude() > Radius) {
                 return;
             }
 

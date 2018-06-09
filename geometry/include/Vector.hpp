@@ -1,10 +1,10 @@
 #pragma once
 
 #include <array>
-#include <numeric>
 #include <cmath>
 #include <ostream>
 #include <stdexcept>
+#include <string>
 
 namespace Geometry {
 
@@ -39,13 +39,13 @@ public:
         return std::sqrt(ret);
     }
 
-    float& x() { return data[0]; }
-    float& y() { return data[1]; }
-    float& z() { return data[2]; }
+    float& X() { return data[0]; }
+    float& Y() { return data[1]; }
+    float& Z() { return data[2]; }
 
-    const float& x() const { return data[0]; }
-    const float& y() const { return data[1]; }
-    const float& z() const { return data[2]; }
+    const float& X() const { return data[0]; }
+    const float& Y() const { return data[1]; }
+    const float& Z() const { return data[2]; }
 
     Vector& Translate(const Vector& other) {
         auto otherIt = other.data.begin();
@@ -76,7 +76,7 @@ public:
     }
 
     Vector& Normalize() {
-        float mag = Magnitude();
+        const auto mag = Magnitude();
         if (mag == 0)
             return *this;
         for (auto& i : data)
@@ -230,10 +230,10 @@ public:
     }
 
     static Vector Cross(const Vector& lhs, const Vector& rhs) {
-        return { lhs.y() * rhs.z() - rhs.y() * lhs.z(), lhs.z() * rhs.x() - rhs.z() * lhs.x(), lhs.x() * rhs.y() - rhs.x() * lhs.y() };
+        return { lhs.Y() * rhs.Z() - rhs.Y() * lhs.Z(), lhs.Z() * rhs.X() - rhs.Z() * lhs.X(), lhs.X() * rhs.Y() - rhs.X() * lhs.Y() };
     }
 
-    inline static float Distance(const Vector& lhs, const Vector& rhs) {
+    static float Distance(const Vector& lhs, const Vector& rhs) {
         return (lhs - rhs).Magnitude();
     }
 

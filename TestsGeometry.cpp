@@ -2,7 +2,6 @@
 
 #include <random>
 #include <type_traits>
-#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 
@@ -44,9 +43,9 @@ Vector<3> ToVector(const glm::vec3& vec) {
 
 template <size_t Size>
 void REQUIRE_APPROX(const Vector<Size>& lhs, const Vector<Size>& rhs) {
-    REQUIRE(lhs.x() == Approx(rhs.x()).epsilon(0.001f));
-    REQUIRE(lhs.y() == Approx(rhs.y()).epsilon(0.001f));
-    REQUIRE(lhs.z() == Approx(rhs.z()).epsilon(0.001f));
+    REQUIRE(lhs.X() == Approx(rhs.X()).epsilon(0.001f));
+    REQUIRE(lhs.Y() == Approx(rhs.Y()).epsilon(0.001f));
+    REQUIRE(lhs.Z() == Approx(rhs.Z()).epsilon(0.001f));
 }
 
 GLMOperators(2);
@@ -63,44 +62,44 @@ TEST_CASE("Vector") {
         REQUIRE(cons);
 
         Vector<3> a;
-        CHECK(a.x() == 0.f);
-        CHECK(a.y() == 0.f);
-        CHECK(a.z() == 0.f);
+        CHECK(a.X() == 0.f);
+        CHECK(a.Y() == 0.f);
+        CHECK(a.Z() == 0.f);
 
         Vector<3> b{ 1.f, 2.f, 3.f };
-        CHECK(b.x() == 1.f);
-        CHECK(b.y() == 2.f);
-        CHECK(b.z() == 3.f);
+        CHECK(b.X() == 1.f);
+        CHECK(b.Y() == 2.f);
+        CHECK(b.Z() == 3.f);
 
         Vector<3> c(2.f);
-        CHECK(c.x() == 2.f);
-        CHECK(c.y() == 2.f);
-        CHECK(c.z() == 2.f);
+        CHECK(c.X() == 2.f);
+        CHECK(c.Y() == 2.f);
+        CHECK(c.Z() == 2.f);
     }
 
     SECTION("Copy ctor") {
         Vector<3> a{ 1.f, 2.f, 3.f };
         Vector<3> b(a);
-        CHECK(b.x() == 1.f);
-        CHECK(b.y() == 2.f);
-        CHECK(b.z() == 3.f);
+        CHECK(b.X() == 1.f);
+        CHECK(b.Y() == 2.f);
+        CHECK(b.Z() == 3.f);
         Vector<3> c(Vector<3>{ 4.f, 5.f, 6.f });
-        CHECK(c.x() == 4.f);
-        CHECK(c.y() == 5.f);
-        CHECK(c.z() == 6.f);
+        CHECK(c.X() == 4.f);
+        CHECK(c.Y() == 5.f);
+        CHECK(c.Z() == 6.f);
     }
 
     SECTION("Copy assignment") {
         Vector<3> a{ 1.f, 2.f, 3.f };
-        Vector<3> b{ 4.f, 5.f, 6.f };
+        Vector<3> b;
         b = a;
-        CHECK(b.x() == 1.f);
-        CHECK(b.y() == 2.f);
-        CHECK(b.z() == 3.f);
+        CHECK(b.X() == 1.f);
+        CHECK(b.Y() == 2.f);
+        CHECK(b.Z() == 3.f);
         b = Vector<3>{ 7.f, 8.f, 9.f };
-        CHECK(b.x() == 7.f);
-        CHECK(b.y() == 8.f);
-        CHECK(b.z() == 9.f);
+        CHECK(b.X() == 7.f);
+        CHECK(b.Y() == 8.f);
+        CHECK(b.Z() == 9.f);
     }
 
     SECTION("Vector arithmetic operators") {
@@ -178,7 +177,7 @@ TEST_CASE("Vector") {
         CHECK(Vector<3>::Dot(Vector<3>(1.f), Vector<3>(1.f)) == 3.f);
 
         auto dot = [](const Vector<3>& lhs, const Vector<3>& rhs) {
-            return lhs.x() * rhs.x() + lhs.y() * rhs.y() + lhs.z() * rhs.z();
+            return lhs.X() * rhs.X() + lhs.Y() * rhs.Y() + lhs.Z() * rhs.Z();
         };
 
         for (unsigned i = 0; i < 100; ++i) {
@@ -197,7 +196,7 @@ TEST_CASE("Vector") {
         CHECK(Vector<3>::Cross({ 1.f, 0.f, 0.f }, { 0.f, 1.f, 0.f }) == Vector<3>{ 0.f, 0.f, 1.f });
 
         auto cross = [](const Vector<3>& lhs, const Vector<3>& rhs) {
-            return Vector<3>{ lhs.y() * rhs.z() - rhs.y() * lhs.z(), lhs.z() * rhs.x() - rhs.z() * lhs.x(), lhs.x() * rhs.y() - rhs.x() * lhs.y() };
+            return Vector<3>{ lhs.Y() * rhs.Z() - rhs.Y() * lhs.Z(), lhs.Z() * rhs.X() - rhs.Z() * lhs.X(), lhs.X() * rhs.Y() - rhs.X() * lhs.Y() };
         };
 
         for (unsigned i = 0; i < 100; ++i) {

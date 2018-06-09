@@ -2,69 +2,69 @@
 
 #include <GLFW/glfw3.h>
 
-const float Camera::min_elevation = 0.1f;
-const float Camera::max_elevation = 1.5f;
-const float Camera::min_distance = 1.0f;
-const float Camera::angle_sensitivity = 0.008f;
-const float Camera::zoom_sensitivity = 0.003f;
+const float Camera::minElevation = 0.1f;
+const float Camera::maxElevation = 1.5f;
+const float Camera::minDistance = 1.0f;
+const float Camera::angleSensitivity = 0.008f;
+const float Camera::zoomSensitivity = 0.003f;
 
 Camera::Camera()
-    : angle_direction(Geometry::Pi / 2.f), angle_elevation(1.2f), distance(90.0f), last_x(0), last_y(0), is_rotating(false),
-      is_zooming(false) {
-    update_eye_pos();
+    : angleDirection(Geometry::pi / 2.f), angleElevation(1.2f), distance(90.0f), lastX(0), lastY(0), isRotating(false),
+      isZooming(false) {
+    UpdateEyePos();
 }
 
-void Camera::update_eye_pos() {
-    eye_position.x() = distance * cosf(angle_elevation) * -sinf(angle_direction);
-    eye_position.y() = distance * sinf(angle_elevation);
-    eye_position.z() = distance * cosf(angle_elevation) * cosf(angle_direction);
+void Camera::UpdateEyePos() {
+    eyePosition.X() = distance * cosf(angleElevation) * -sinf(angleDirection);
+    eyePosition.Y() = distance * sinf(angleElevation);
+    eyePosition.Z() = distance * cosf(angleElevation) * cosf(angleDirection);
 }
 
-void Camera::on_mouse_button(int button, int action, int mods) {
+void Camera::OnMouseButton(int button, int action, int mods) {
     // Left mouse button affects the angles
     if (button == GLFW_MOUSE_BUTTON_LEFT) {
         if (action == GLFW_PRESS) {
-            is_rotating = true;
+            isRotating = true;
         } else {
-            is_rotating = false;
+            isRotating = false;
         }
     }
     // Right mouse button affects the zoom
     if (button == GLFW_MOUSE_BUTTON_RIGHT) {
         if (action == GLFW_PRESS) {
-            is_zooming = true;
+            isZooming = true;
         } else {
-            is_zooming = false;
+            isZooming = false;
         }
     }
 }
 
-void Camera::on_mouse_move(double x, double y) {
-    float dx = float(x - last_x);
-    float dy = float(y - last_y);
-    last_x = static_cast<int>(x);
-    last_y = static_cast<int>(y);
+void Camera::OnMouseMove(double x, double y) {
+    auto dx = float(x - lastX);
+    auto dy = float(y - lastY);
+    lastX = static_cast<int>(x);
+    lastY = static_cast<int>(y);
 
-    if (is_rotating) {
-        angle_direction += dx * angle_sensitivity;
-        angle_elevation += dy * angle_sensitivity;
-
-        // Clamp the results
-        if (angle_elevation > max_elevation)
-            angle_elevation = max_elevation;
-        if (angle_elevation < min_elevation)
-            angle_elevation = min_elevation;
-    }
-    if (is_zooming) {
-        distance *= (1.0f + dy * zoom_sensitivity);
+    if (isRotating) {
+        angleDirection += dx * angleSensitivity;
+        angleElevation += dy * angleSensitivity;
 
         // Clamp the results
-        if (distance < min_distance)
-            distance = min_distance;
+        if (angleElevation > maxElevation)
+            angleElevation = maxElevation;
+        if (angleElevation < minElevation)
+            angleElevation = minElevation;
     }
-    update_eye_pos();
+    if (isZooming) {
+        distance *= 1.0f + dy * zoomSensitivity;
+
+        // Clamp the results
+        if (distance < minDistance)
+            distance = minDistance;
+    }
+    UpdateEyePos();
 }
 
-Geometry::Vector<3> Camera::get_eye_position() const {
-    return eye_position;
+Geometry::Vector<3> Camera::GetEyePosition() const {
+    return eyePosition;
 }
