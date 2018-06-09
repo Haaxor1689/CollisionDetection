@@ -92,8 +92,8 @@ void Application::Init() {
     }
 
     pads.emplace_back(PAD_DISTANCE, PAD_SEGMENTS, 0.f);
-    // pads.emplace_back(PAD_DISTANCE, PAD_SEGMENTS, 2.f * Geometry::pi / 3.f);
-    // pads.emplace_back(PAD_DISTANCE, PAD_SEGMENTS, 4.f * Geometry::pi / 3.f);
+    pads.emplace_back(PAD_DISTANCE, PAD_SEGMENTS, 2.f * Geometry::pi / 3.f);
+    pads.emplace_back(PAD_DISTANCE, PAD_SEGMENTS, 4.f * Geometry::pi / 3.f);
 
     for (float i = 0; i < 1.f; ++i) {
         float offset = i * 1.9f;
@@ -105,6 +105,13 @@ void Application::Init() {
 }
 
 void Application::Step() {
+    if (isPaused) {
+        return;
+    }
+    if (isStepping) {
+        isPaused = true;
+    }
+
     for (auto& ball : balls) {
         ball.Step();
     }
@@ -156,7 +163,7 @@ void Application::Render() {
     glUniform3fv(eyePositionLoc, 1, &camera.GetEyePosition());
 
     // Set light
-    auto lightPos = Geometry::Vector<3>{ 5.f / 4.f + 0.75f, 1.f, 0.f }.Rotate(appTime, { 0.f, 1.f, 0.f });
+    auto lightPos = Geometry::Vector<3>{ 5.f / 4.f + 0.75f, 1.f, 0.f };//.Rotate(appTime, { 0.f, 1.f, 0.f });
     glUniform4f(lightPositionLoc, lightPos.X(), lightPos.Y(), lightPos.Z(), 0.f);
 
     // Colors
@@ -234,22 +241,14 @@ void Application::Gui() {
         nk_layout_row_static(ctx, 26, 100, 2);
         nk_label(ctx, "End Angle: ", NK_TEXT_LEFT);
         nk_label(ctx, std::to_string(endAngle).c_str(), NK_TEXT_LEFT);
-        
+
         nk_layout_row_static(ctx, 26, 100, 2);
-        nk_label(ctx, "InnerStartCorner: ", NK_TEXT_LEFT);
-        nk_label(ctx, ("[" + Geometry::ToString(pads[0].InnerStartCorner().X(), 2) + ", " + Geometry::ToString(pads[0].InnerStartCorner().Y(), 2) + "]").c_str(), NK_TEXT_LEFT);
-        
-        nk_layout_row_static(ctx, 26, 100, 2);
-        nk_label(ctx, "InnerEndCorner: ", NK_TEXT_LEFT);
-        nk_label(ctx, ("[" + Geometry::ToString(pads[0].InnerEndCorner().X(), 2) + ", " + Geometry::ToString(pads[0].InnerEndCorner().Y(), 2) + "]").c_str(), NK_TEXT_LEFT);
-        
-        nk_layout_row_static(ctx, 26, 100, 2);
-        nk_label(ctx, "OuterStartCorner: ", NK_TEXT_LEFT);
-        nk_label(ctx, ("[" + Geometry::ToString(pads[0].OuterStartCorner().X(), 2) + ", " + Geometry::ToString(pads[0].OuterStartCorner().Y(), 2) + "]").c_str(), NK_TEXT_LEFT);
-        
-        nk_layout_row_static(ctx, 26, 100, 2);
-        nk_label(ctx, "OuterEndCorner: ", NK_TEXT_LEFT);
-        nk_label(ctx, ("[" + Geometry::ToString(pads[0].OuterEndCorner().X(), 2) + ", " + Geometry::ToString(pads[0].OuterEndCorner().Y(), 2) + "]").c_str(), NK_TEXT_LEFT);
+        if (nk_button_label(ctx, isPaused ? "Play" : "Pause")) {
+            isPaused = !isPaused;
+        }
+        if (nk_button_label(ctx, isStepping ? "Step On" : "Step Off")) {
+            isStepping = !isStepping;
+        }
     }
     nk_end(ctx);
 }

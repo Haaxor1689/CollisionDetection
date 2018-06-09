@@ -40,6 +40,9 @@ private:
 
     Camera camera;
 
+    bool isPaused = false;
+    bool isStepping = false;
+
     // Attr and uniform locations
     GLint modelMatrixLoc = -1;
     GLint viewMatrixLoc = -1;
