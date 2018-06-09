@@ -38,10 +38,10 @@ public:
     float AngleEnd() const { return angleStart + static_cast<float>(segmentsCount) * ANGLE; }
     float Height() const { return height; }
     
-    Geometry::Vector<3> InnerStartCorner() const { return Geometry::Vector<3>{ InnerRadius(), 1.f, 0.f }.Rotate(AngleStart(), { 0.f, 1.f, 0.f }); }
-    Geometry::Vector<3> InnerEndCorner() const { return Geometry::Vector<3>{ InnerRadius(), 1.f, 0.f }.Rotate(AngleEnd(), { 0.f, 1.f, 0.f }); }
-    Geometry::Vector<3> OuterStartCorner() const { return Geometry::Vector<3>{ OuterRadius(), 1.f, 0.f }.Rotate(AngleStart(), { 0.f, 1.f, 0.f }); }
-    Geometry::Vector<3> OuterEndCorner() const { return Geometry::Vector<3>{ OuterRadius(), 1.f, 0.f }.Rotate(AngleEnd(), { 0.f, 1.f, 0.f }); }
+    Geometry::Vector<3> InnerStartCorner() const { return Geometry::Vector<3>{ InnerRadius(), 1.f, 0.f }.Rotate(-AngleStart(), { 0.f, 1.f, 0.f }); }
+    Geometry::Vector<3> InnerEndCorner() const { return Geometry::Vector<3>{ InnerRadius(), 1.f, 0.f }.Rotate(-AngleEnd(), { 0.f, 1.f, 0.f }); }
+    Geometry::Vector<3> OuterStartCorner() const { return Geometry::Vector<3>{ OuterRadius(), 1.f, 0.f }.Rotate(-AngleStart(), { 0.f, 1.f, 0.f }); }
+    Geometry::Vector<3> OuterEndCorner() const { return Geometry::Vector<3>{ OuterRadius(), 1.f, 0.f }.Rotate(-AngleEnd(), { 0.f, 1.f, 0.f }); }
 };
 
 } // namespace Collisions

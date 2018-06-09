@@ -91,6 +91,7 @@ private:
     float movementSpeed = 0.05f;
 
     void DrawObject(const Mesh& mesh, const Collisions::Collider& collider) const;
+    void SpawnBalls();
 
     static void OnKey(GLFWwindow* window, int key, int scancode, int actions, int mods) {
         auto thisPointer = static_cast<Application*>(glfwGetWindowUserPointer(window));

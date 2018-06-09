@@ -80,20 +80,13 @@ void Application::Init() {
     ctx = nk_glfw3_init(Window.GetWindow(), NK_GLFW3_INSTALL_CALLBACKS);
     nk_glfw3_font_stash_begin(&atlas);
     nk_glfw3_font_stash_end();
-
+    
     // Objects
-    std::random_device r;
-    std::default_random_engine e(r());
-    const std::uniform_real_distribution<float> pos(-5.f, 5.f);
-    const std::uniform_real_distribution<float> vel(-0.5f, 0.5f);
-
-    for (unsigned i = 0; i < 1; ++i) {
-        balls.emplace_back(Geometry::Vector<3>{ pos(e), 1.f, pos(e) }, Geometry::Vector<3>{ vel(e), 0.f, vel(e) }, 1.f);
-    }
+    SpawnBalls();
 
     pads.emplace_back(PAD_DISTANCE, PAD_SEGMENTS, 0.f);
-    pads.emplace_back(PAD_DISTANCE, PAD_SEGMENTS, 2.f * Geometry::pi / 3.f);
-    pads.emplace_back(PAD_DISTANCE, PAD_SEGMENTS, 4.f * Geometry::pi / 3.f);
+    // pads.emplace_back(PAD_DISTANCE, PAD_SEGMENTS, 2.f * Geometry::pi / 3.f);
+    // pads.emplace_back(PAD_DISTANCE, PAD_SEGMENTS, 4.f * Geometry::pi / 3.f);
 
     for (float i = 0; i < 1.f; ++i) {
         float offset = i * 1.9f;
@@ -249,6 +242,11 @@ void Application::Gui() {
         if (nk_button_label(ctx, isStepping ? "Step On" : "Step Off")) {
             isStepping = !isStepping;
         }
+        
+        if (nk_button_label(ctx, "Respawn balls")) {
+            balls.clear();
+            SpawnBalls();
+        }
     }
     nk_end(ctx);
 }
@@ -277,6 +275,16 @@ void Application::DrawObject(const Mesh& mesh, const Collisions::Collider& colli
 
     glUniformMatrix4fv(modelMatrixLoc, 1, GL_FALSE, &modelMatrix);
     mesh.Draw();
+}
+
+void Application::SpawnBalls() {
+    std::random_device r;
+    std::default_random_engine e(r());
+    const std::uniform_real_distribution<float> pos(-5.f, 5.f);
+    const std::uniform_real_distribution<float> vel(-0.5f, 0.5f);
+    for (unsigned i = 0; i < 1; ++i) {
+        balls.emplace_back(Geometry::Vector<3>{ pos(e), 1.f, pos(e) }, Geometry::Vector<3>{ vel(e), 0.f, vel(e) }, 1.f);
+    }
 }
 
 void Application::OnMousePosition(double x, double y) {
