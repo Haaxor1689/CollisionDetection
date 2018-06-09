@@ -84,24 +84,24 @@ void Application::Init() {
     // Objects
     std::random_device r;
     std::default_random_engine e(r());
-    const std::uniform_real_distribution<float> pos(-15.f, 15.f);
+    const std::uniform_real_distribution<float> pos(-5.f, 5.f);
     const std::uniform_real_distribution<float> vel(-0.5f, 0.5f);
 
-    for (unsigned i = 0; i < 3; ++i) {
+    for (unsigned i = 0; i < 1; ++i) {
         balls.emplace_back(Geometry::Vector<3>{ pos(e), 1.f, pos(e) }, Geometry::Vector<3>{ vel(e), 0.f, vel(e) }, 1.f);
     }
 
     pads.emplace_back(PAD_DISTANCE, PAD_SEGMENTS, 0.f);
-    pads.emplace_back(PAD_DISTANCE, PAD_SEGMENTS, 2.f * Geometry::pi / 3.f);
-    pads.emplace_back(PAD_DISTANCE, PAD_SEGMENTS, 4.f * Geometry::pi / 3.f);
+    // pads.emplace_back(PAD_DISTANCE, PAD_SEGMENTS, 2.f * Geometry::pi / 3.f);
+    // pads.emplace_back(PAD_DISTANCE, PAD_SEGMENTS, 4.f * Geometry::pi / 3.f);
 
-    // for (float i = 0; i < 4.f; ++i) {
-    //     float offset = i * 1.9f;
-    //     float height = i * brick_height;
-    //     for (int j = 0; j < 8; ++j) {
-    //         bricks.emplace_back(brick_distance, brick_segments, 2.f * j * Geometry::Pi / 8.f + offset, height);
-    //     }
-    // }
+    for (float i = 0; i < 1.f; ++i) {
+        float offset = i * 1.9f;
+        float height = i * BRICK_HEIGHT;
+        for (int j = 0; j < 8; ++j) {
+            bricks.emplace_back(BRICK_DISTANCE, BRICK_SEGMENTS, 2.f * j * Geometry::pi / 8.f + offset, height);
+        }
+    }
 }
 
 void Application::Step() {
@@ -234,6 +234,22 @@ void Application::Gui() {
         nk_layout_row_static(ctx, 26, 100, 2);
         nk_label(ctx, "End Angle: ", NK_TEXT_LEFT);
         nk_label(ctx, std::to_string(endAngle).c_str(), NK_TEXT_LEFT);
+        
+        nk_layout_row_static(ctx, 26, 100, 2);
+        nk_label(ctx, "InnerStartCorner: ", NK_TEXT_LEFT);
+        nk_label(ctx, ("[" + Geometry::ToString(pads[0].InnerStartCorner().X(), 2) + ", " + Geometry::ToString(pads[0].InnerStartCorner().Y(), 2) + "]").c_str(), NK_TEXT_LEFT);
+        
+        nk_layout_row_static(ctx, 26, 100, 2);
+        nk_label(ctx, "InnerEndCorner: ", NK_TEXT_LEFT);
+        nk_label(ctx, ("[" + Geometry::ToString(pads[0].InnerEndCorner().X(), 2) + ", " + Geometry::ToString(pads[0].InnerEndCorner().Y(), 2) + "]").c_str(), NK_TEXT_LEFT);
+        
+        nk_layout_row_static(ctx, 26, 100, 2);
+        nk_label(ctx, "OuterStartCorner: ", NK_TEXT_LEFT);
+        nk_label(ctx, ("[" + Geometry::ToString(pads[0].OuterStartCorner().X(), 2) + ", " + Geometry::ToString(pads[0].OuterStartCorner().Y(), 2) + "]").c_str(), NK_TEXT_LEFT);
+        
+        nk_layout_row_static(ctx, 26, 100, 2);
+        nk_label(ctx, "OuterEndCorner: ", NK_TEXT_LEFT);
+        nk_label(ctx, ("[" + Geometry::ToString(pads[0].OuterEndCorner().X(), 2) + ", " + Geometry::ToString(pads[0].OuterEndCorner().Y(), 2) + "]").c_str(), NK_TEXT_LEFT);
     }
     nk_end(ctx);
 }

@@ -4,6 +4,7 @@
 #include "BoundsCollider.hpp"
 #include "BrickCollider.hpp"
 #include "objects.inl"
+#include <iostream>
 
 namespace Collisions {
 
@@ -16,7 +17,10 @@ public:
     const float Mass;
 
     BallCollider(Geometry::Vector<3>&& position, Geometry::Vector<3>&& velocity, float radius)
-        : position(std::move(position)), velocity(std::move(velocity)), Radius(radius), Mass(4 * Geometry::pi * radius * radius * radius * 11.34f / 3) {}
+        : position(std::move(position)),
+          velocity(std::move(velocity)),
+          Radius(radius),
+          Mass(4 * Geometry::pi * radius * radius * radius * 11.34f / 3) {}
 
     // Visitors
     void Visit(ColliderVisitor& visitor) override { visitor(*this); }
@@ -55,6 +59,10 @@ public:
     }
 
     void Collision(const BrickCollider& other) {
+        if (other.Height() != 0) {
+            return;
+        }
+
         const auto mag = position.Magnitude();
 
         // Return if ball isn't inside the ring
@@ -81,7 +89,15 @@ public:
                 return;
             }
 
-            normal = Geometry::Vector<2>{ sin(otherStart), -cos(otherStart) };
+            if (mag < other.InnerRadius()) {
+                std::cout << "inner corner" << std::endl;
+                normal = (other.InnerStartCorner() - position).To2();
+            } else if (mag > other.OuterRadius()) {
+                std::cout << "outer corner" << std::endl;
+                normal = (other.OuterStartCorner() - position).To2();
+            } else {
+                normal = Geometry::Vector<2>{ sin(otherStart), -cos(otherStart) }.Invert();
+            }
         } else if (positionAngle < otherEnd) {
             const auto minusPosition = Geometry::Vector<2>() - position.To2();
             const auto line = Geometry::Vector<2>{ cos(otherEnd), sin(otherEnd) };
@@ -90,16 +106,25 @@ public:
                 return;
             }
 
-            normal = Geometry::Vector<2>{ -sin(otherEnd), cos(otherEnd) };
+            if (mag < other.InnerRadius()) {
+                std::cout << "inner corner" << std::endl;
+                normal = (other.InnerEndCorner() - position).To2();
+            } else if (mag > other.OuterRadius()) {
+                std::cout << "outer corner" << std::endl;
+                normal = (other.OuterEndCorner() - position).To2();
+            } else {
+                normal = Geometry::Vector<2>{ -sin(otherEnd), cos(otherEnd) }.Invert();
+            }
         } else {
             // Ball is inside brick cone
-            normal = position.To2().Normalize();
+            normal = position.To2();
 
             if (mag < other.MiddleRadius()) {
                 // Collision with outer wall
                 normal.Invert();
             }
         }
+        normal.Normalize();
         const auto velocity2D = velocity.To2().Invert();
 
         // Move ball to before collision
