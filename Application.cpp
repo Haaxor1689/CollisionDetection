@@ -87,13 +87,13 @@ void Application::Init() {
     const std::uniform_real_distribution<float> pos(-15.f, 15.f);
     const std::uniform_real_distribution<float> vel(-0.5f, 0.5f);
 
-    // for (unsigned i = 0; i < 3; ++i) {
-    balls.emplace_back(Geometry::Vector<3>{ pos(e), 1.f, pos(e) }, Geometry::Vector<3>{ vel(e), 0.f, vel(e) }, 1.f);
-    // }
+    for (unsigned i = 0; i < 3; ++i) {
+        balls.emplace_back(Geometry::Vector<3>{ pos(e), 1.f, pos(e) }, Geometry::Vector<3>{ vel(e), 0.f, vel(e) }, 1.f);
+    }
 
-    pads.emplace_back(pad_distance, pad_segments, 0.f);
-    pads.emplace_back(pad_distance, pad_segments, 2.f * Geometry::pi / 3.f);
-    pads.emplace_back(pad_distance, pad_segments, 4.f * Geometry::pi / 3.f);
+    pads.emplace_back(PAD_DISTANCE, PAD_SEGMENTS, 0.f);
+    pads.emplace_back(PAD_DISTANCE, PAD_SEGMENTS, 2.f * Geometry::pi / 3.f);
+    pads.emplace_back(PAD_DISTANCE, PAD_SEGMENTS, 4.f * Geometry::pi / 3.f);
 
     // for (float i = 0; i < 4.f; ++i) {
     //     float offset = i * 1.9f;

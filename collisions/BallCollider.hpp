@@ -40,10 +40,10 @@ public:
             return;
         }
 
-        float newVelX1 = (velocity.X() * (Mass - other.Mass) + (2 * other.Mass * other.velocity.X())) / (Mass + other.Mass);
-        float newVelZ1 = (velocity.Z() * (Mass - other.Mass) + (2 * other.Mass * other.velocity.Z())) / (Mass + other.Mass);
-        float newVelX2 = (other.velocity.X() * (other.Mass - Mass) + (2 * Mass * velocity.X())) / (Mass + other.Mass);
-        float newVelZ2 = (other.velocity.Z() * (other.Mass - Mass) + (2 * Mass * velocity.Z())) / (Mass + other.Mass);
+        auto newVelX1 = (velocity.X() * (Mass - other.Mass) + 2 * other.Mass * other.velocity.X()) / (Mass + other.Mass);
+        auto newVelZ1 = (velocity.Z() * (Mass - other.Mass) + 2 * other.Mass * other.velocity.Z()) / (Mass + other.Mass);
+        auto newVelX2 = (other.velocity.X() * (other.Mass - Mass) + 2 * Mass * velocity.X()) / (Mass + other.Mass);
+        auto newVelZ2 = (other.velocity.Z() * (other.Mass - Mass) + 2 * Mass * velocity.Z()) / (Mass + other.Mass);
 
         // Move balls to before collision
         position -= velocity;
@@ -55,33 +55,42 @@ public:
     }
 
     void Collision(const BrickCollider& other) {
-        float mag = position.Magnitude();
+        const auto mag = position.Magnitude();
 
         // Return if ball isn't inside the ring
         if (mag > other.OuterRadius() + Radius || mag < other.InnerRadius() - Radius) {
             return;
         }
 
-        const float positionAngle = std::atan2(position.Z(), position.X());
+        const auto positionAngle = std::atan2(position.Z(), position.X());
+        auto otherStart = other.AngleStart();
+        auto otherEnd = other.AngleEnd();
+
+        // In case end angle is smaller than -pi and ball is on positive angle, rotate pad to positive numbers
+        if (otherEnd < -Geometry::pi && positionAngle > 0.f) {
+            otherStart += 2 * Geometry::pi;
+            otherEnd += 2 * Geometry::pi;
+        }
+
         Geometry::Vector<2> normal;
-        if (positionAngle > other.AngleStart()) {
-            auto minusPosition = Geometry::Vector<2>() - position.To2();
-            auto line = Geometry::Vector<2>{ cos(other.AngleStart()), sin(other.AngleStart()) };
-            auto distance = minusPosition - (Geometry::Vector<2>::Dot(minusPosition, line) * line);
+        if (positionAngle > otherStart) {
+            const auto minusPosition = Geometry::Vector<2>() - position.To2();
+            const auto line = Geometry::Vector<2>{ cos(otherStart), sin(otherStart) };
+            auto distance = minusPosition - Geometry::Vector<2>::Dot(minusPosition, line) * line;
             if (distance.Magnitude() > Radius) {
                 return;
             }
 
-            normal = Geometry::Vector<2>{ sin(other.AngleStart()), -cos(other.AngleStart()) };
-        } else if (positionAngle < other.AngleEnd()) {
-            auto minusPosition = Geometry::Vector<2>() - position.To2();
-            auto line = Geometry::Vector<2>{ cos(other.AngleEnd()), sin(other.AngleEnd()) };
-            auto distance = minusPosition - (Geometry::Vector<2>::Dot(minusPosition, line) * line);
+            normal = Geometry::Vector<2>{ sin(otherStart), -cos(otherStart) };
+        } else if (positionAngle < otherEnd) {
+            const auto minusPosition = Geometry::Vector<2>() - position.To2();
+            const auto line = Geometry::Vector<2>{ cos(otherEnd), sin(otherEnd) };
+            auto distance = minusPosition - Geometry::Vector<2>::Dot(minusPosition, line) * line;
             if (distance.Magnitude() > Radius) {
                 return;
             }
 
-            normal = Geometry::Vector<2>{ -sin(other.AngleEnd()), cos(other.AngleEnd()) };
+            normal = Geometry::Vector<2>{ -sin(otherEnd), cos(otherEnd) };
         } else {
             // Ball is inside brick cone
             normal = position.To2().Normalize();
@@ -91,7 +100,7 @@ public:
                 normal.Invert();
             }
         }
-        auto velocity2D = velocity.To2().Invert();
+        const auto velocity2D = velocity.To2().Invert();
 
         // Move ball to before collision
         position -= velocity;
@@ -105,8 +114,8 @@ public:
             return;
         }
 
-        auto velocity2D = velocity.To2().Invert();
-        auto normal = Geometry::Vector<2>::Inverted(position.To2()).Normalize();
+        const auto velocity2D = velocity.To2().Invert();
+        const auto normal = Geometry::Vector<2>::Inverted(position.To2()).Normalize();
 
         // Move ball to before collision
         position -= velocity;

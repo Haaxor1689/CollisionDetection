@@ -81,7 +81,7 @@ private:
     std::vector<Collisions::BallCollider> balls{};
     std::vector<Collisions::BrickCollider> pads{};
     std::vector<Collisions::BrickCollider> bricks{};
-    Collisions::BoundsCollider bounds = { radius };
+    Collisions::BoundsCollider bounds = { RADIUS };
 
     // Player input
     float movement = 0.f;

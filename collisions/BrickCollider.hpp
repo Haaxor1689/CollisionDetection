@@ -13,7 +13,10 @@ class BrickCollider : public Collider {
 
 public:
     BrickCollider(float distance, unsigned segmentsCount, float angle = 0.f, float height = 0.f)
-        : distance(distance), segmentsCount(segmentsCount), angleStart(angle), height(height) {}
+        : distance(distance),
+          segmentsCount(segmentsCount),
+          angleStart(angle),
+          height(height) {}
 
     // Visitors
     void Visit(ColliderVisitor& visitor) override { visitor(*this); }
@@ -29,10 +32,10 @@ public:
     }
 
     float InnerRadius() const { return distance; }
-    float OuterRadius() const { return distance + brick_width; }
-    float MiddleRadius() const { return distance + brick_width / 2.f; }
+    float OuterRadius() const { return distance + BRICK_WIDTH; }
+    float MiddleRadius() const { return distance + BRICK_WIDTH / 2.f; }
     float AngleStart() const { return angleStart; }
-    float AngleEnd() const { return angleStart + static_cast<float>(segmentsCount) * angle; }
+    float AngleEnd() const { return angleStart + static_cast<float>(segmentsCount) * ANGLE; }
     float Height() const { return height; }
 };
 

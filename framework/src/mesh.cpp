@@ -197,19 +197,19 @@ Mesh Mesh::Sphere(GLint positionLocation, GLint normalLocation, GLint texCoordLo
 }
 
 Mesh Mesh::Ground(GLint positionLocation, GLint normalLocation, GLint texCoordLocation) {
-    return FromInterleaved(ground_vertices,
+    return FromInterleaved(GROUND_VERTICES,
                            {}, GL_TRIANGLE_FAN,
                            positionLocation, normalLocation, texCoordLocation);
 }
 
 Mesh Mesh::Pad(GLint positionLocation, GLint normalLocation, GLint texCoordLocation) {
-    return FromInterleaved(pad_vertices,
+    return FromInterleaved(PAD_VERTICES,
                            {}, GL_TRIANGLE_STRIP,
                            positionLocation, normalLocation, texCoordLocation);
 }
 
 Mesh Mesh::Brick(GLint positionLocation, GLint normalLocation, GLint texCoordLocation) {
-    return FromInterleaved(brick_vertices,
+    return FromInterleaved(BRICK_VERTICES,
                            {}, GL_TRIANGLE_STRIP,
                            positionLocation, normalLocation, texCoordLocation);
 }
