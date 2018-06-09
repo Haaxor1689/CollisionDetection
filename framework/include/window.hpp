@@ -28,6 +28,7 @@ public:
 
     int get_width() { return width; }
     int get_height() { return height; }
+    GLFWwindow* get_window() { return window; }
 
 private:
     int width;

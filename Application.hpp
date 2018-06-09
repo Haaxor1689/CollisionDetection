@@ -9,7 +9,6 @@
 #include "window.hpp"
 #include "camera.hpp"
 #include "texture.hpp"
-#include "font.hpp"
 
 #include "Collisions"
 

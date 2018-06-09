@@ -90,14 +90,14 @@ void Application::init() {
     }
 
     pads.emplace_back(pad_distance, pad_segments, 0.f);
-    pads.emplace_back(pad_distance, pad_segments, 2.f * Geometry::Pi() / 3.f);
-    pads.emplace_back(pad_distance, pad_segments, 4.f * Geometry::Pi() / 3.f);
+    pads.emplace_back(pad_distance, pad_segments, 2.f * Geometry::Pi / 3.f);
+    pads.emplace_back(pad_distance, pad_segments, 4.f * Geometry::Pi / 3.f);
 
     for (float i = 0; i < 4.f; ++i) {
         float offset = i * 1.9f;
         float height = i * brick_height;
         for (int j = 0; j < 8; ++j) {
-            bricks.emplace_back(brick_distance, brick_segments, 2.f * j * Geometry::Pi() / 8.f + offset, height);
+            bricks.emplace_back(brick_distance, brick_segments, 2.f * j * Geometry::Pi / 8.f + offset, height);
         }
     }
 }
@@ -202,7 +202,7 @@ void Application::gui() {
 
         nk_layout_row_static(ctx, 26, 100, 2);
         nk_label(ctx, "Position: ", NK_TEXT_LEFT);
-        nk_label(ctx, ("[" + std::to_string((int)ballPosition.x()) + ", " + std::to_string((int)ballPosition.z()) + "]").c_str(), NK_TEXT_LEFT);
+        nk_label(ctx, ("[" + std::to_string(static_cast<int>(ballPosition.x())) + ", " + std::to_string(static_cast<int>(ballPosition.z())) + "]").c_str(), NK_TEXT_LEFT);
 
         nk_layout_row_static(ctx, 26, 100, 2);
         nk_label(ctx, "Distance: ", NK_TEXT_LEFT);

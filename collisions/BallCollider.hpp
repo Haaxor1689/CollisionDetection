@@ -16,7 +16,7 @@ public:
     const float mass;
 
     BallCollider(Geometry::Vector<3>&& position, Geometry::Vector<3>&& velocity, float radius)
-        : position(std::move(position)), velocity(std::move(velocity)), radius(radius), mass(4 * Geometry::Pi() * radius * radius * radius * 11.34f / 3) {}
+        : position(std::move(position)), velocity(std::move(velocity)), radius(radius), mass(4 * Geometry::Pi * radius * radius * radius * 11.34f / 3) {}
 
     // Visitors
     void visit(ColliderVisitor& visitor) { visitor(*this); }

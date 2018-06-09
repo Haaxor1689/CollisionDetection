@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.8)
 
 include(ExternalProject)
 
@@ -122,3 +122,11 @@ target_include_directories(Test
         PRIVATE ${COLLISIONS_INCLUDE_DIR}
         PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/objects"
 )
+
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/shaders/main.vert" "${CMAKE_CURRENT_BINARY_DIR}/shaders/main.vert" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/shaders/main.frag" "${CMAKE_CURRENT_BINARY_DIR}/shaders/main.frag" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/images/bricks.png" "${CMAKE_CURRENT_BINARY_DIR}/images/bricks.png" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/images/glass.png" "${CMAKE_CURRENT_BINARY_DIR}/images/glass.png" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/images/roof.png" "${CMAKE_CURRENT_BINARY_DIR}/images/roof.png" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/images/rune.png" "${CMAKE_CURRENT_BINARY_DIR}/images/rune.png" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/images/wood.png" "${CMAKE_CURRENT_BINARY_DIR}/images/wood.png" COPYONLY)

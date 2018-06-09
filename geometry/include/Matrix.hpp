@@ -60,9 +60,9 @@ public:
         }
     }
 
-    Matrix& Translate(const Vector<Width - 1>& dimensions) { throw DimensionsException("Matrix", "Translate"); }
-    Matrix& Rotate(float angle, Vector<Width - 1> axis) { throw DimensionsException("Matrix", "Rotate"); }
-    Matrix& Scale(const Vector<Width - 1>& dimensions) { throw DimensionsException("Matrix", "Scale"); }
+    Matrix& Translate(const Vector<Width - 1>& dimensions) { throw DimensionsException<Width>("Matrix", "Translate"); }
+    Matrix& Rotate(float angle, Vector<Width - 1> axis) { throw DimensionsException<Width>("Matrix", "Rotate"); }
+    Matrix& Scale(const Vector<Width - 1>& dimensions) { throw DimensionsException<Width>("Matrix", "Scale"); }
 
     int Determinant() const {
         float det = 0;
@@ -210,7 +210,7 @@ public:
 
 template <>
 inline int Matrix<2>::Determinant() const {
-    return data[0] * data[3] - data[1] * data[2];
+    return static_cast<int>(std::round(data[0] * data[3] - data[1] * data[2]));
 }
 
 template <>
@@ -228,7 +228,7 @@ inline Matrix<4>& Matrix<4>::Rotate(float angle, Vector<3> axis) {
     float const s = sin(angle);
 
     axis.Normalize();
-    Vector temp = axis * (1.f - c);
+    Vector<3> temp = axis * (1.f - c);
 
     Matrix rotation = Matrix::Identity();
     rotation[0][0] = c + temp[0] * axis[0];

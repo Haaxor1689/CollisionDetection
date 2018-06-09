@@ -4,7 +4,8 @@
 
 namespace Collisions {
 
-struct BoundsCollider : public Collider {
+class BoundsCollider : public Collider {
+public:
     const float radius;
 
     BoundsCollider(float radius)

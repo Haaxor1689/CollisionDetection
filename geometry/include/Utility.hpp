@@ -1,32 +1,28 @@
 #pragma once
 
-#include <math.h>
-
 #include "Vector.hpp"
 #include "Matrix.hpp"
 
 namespace Geometry {
-constexpr float Pi() {
-    return std::atan(1) * 4;
-}
+constexpr float Pi = 3.14159265358979323846f;
 
 constexpr float Radians(float degrees) {
-    return degrees * Pi() / 180;
+    return degrees * Pi / 180;
 }
 
 constexpr float Degrees(float radians) {
-    return radians * 180 / Pi();
+    return radians * 180 / Pi;
 }
 
-inline Matrix<4> Perspective(float fov, float aspect, float near, float far) {
+inline Matrix<4> Perspective(float fov, float aspect, float near_, float far_) {
     float S = 1.f / std::tan(Radians(fov) * 0.5f);
 
     Matrix<4> ret(0.f);
     ret[0][0] = 1.f / aspect * S;
     ret[1][1] = S;
     ret[3][2] = -1.f;
-    ret[2][2] = -(far + near) / (far - near);
-    ret[2][3] = -(2.f * far * near) / (far - near);
+    ret[2][2] = -(far_ + near_) / (far_ - near_);
+    ret[2][3] = -(2.f * far_ * near_) / (far_ - near_);
     return ret;
 }
 

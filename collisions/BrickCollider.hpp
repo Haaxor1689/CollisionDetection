@@ -7,7 +7,7 @@ namespace Collisions {
 
 class BrickCollider : public Collider {
     float distance;
-    float segmentsCount;
+    unsigned segmentsCount;
     float angleStart;
     float height;
 
@@ -21,10 +21,10 @@ public:
 
     void Rotate(float angle) {
         angleStart += angle;
-        if (angleStart > Geometry::Pi()) {
-            angleStart -= 2 * Geometry::Pi();
-        } else if (angleStart < -Geometry::Pi()) {
-            angleStart += 2 * Geometry::Pi();
+        if (angleStart > Geometry::Pi) {
+            angleStart -= 2 * Geometry::Pi;
+        } else if (angleStart < -Geometry::Pi) {
+            angleStart += 2 * Geometry::Pi;
         }
     }
 
@@ -32,7 +32,7 @@ public:
     float OuterRadius() const { return distance + brick_width; }
     float MiddleRadius() const { return distance + brick_width / 2.f; }
     float AngleStart() const { return angleStart; }
-    float AngleEnd() const { return angleStart + segmentsCount * angle; }
+    float AngleEnd() const { return angleStart + static_cast<float>(segmentsCount) * angle; }
     float Height() const { return height; }
 };
 
