@@ -113,9 +113,6 @@ public:
         {
             const auto dist = Geometry::Vector<3>::Distance(position, corner);
             position += (position - corner) * (Radius - dist) / dist;
-            if (std::abs(Geometry::Vector<3>::Distance(position, corner) - Radius) > 0.1f) {
-                std::cout << "fuck" << std::endl;
-            }
 
             return (corner - position).To2().Normalize();
         };
@@ -126,11 +123,7 @@ public:
             while (std::abs(delta) > 0.1 && i < 256) {
                 delta < 0 ? position -= velocity / i : position += velocity / i;
                 i *= 2;
-                const auto newDelta = distanceToLine(lineAngle) - Radius;
-                if (std::abs(newDelta) > std::abs(delta)) {
-                    std::cout << "sideWallCollision whoops" << std::endl;
-                }
-                delta = newDelta;
+                delta = distanceToLine(lineAngle) - Radius;
             }
 
             return Geometry::Vector<2>{ sin(lineAngle), -cos(lineAngle) }.Invert();
@@ -142,11 +135,7 @@ public:
             while (std::abs(delta) > 0.1 && i < 256) {
                 delta < 0 ? position -= velocity / i : position += velocity / i;
                 i *= 2;
-                const auto newDelta = Position().Magnitude() - Radius - otherRadius;
-                if (std::abs(newDelta) > std::abs(delta)) {
-                    std::cout << "outerWallCollision whoops" << std::endl;
-                }
-                delta = newDelta;
+                delta = Position().Magnitude() - Radius - otherRadius;
             }
             return position.To2().Invert();
         };
@@ -157,11 +146,7 @@ public:
             while (std::abs(delta) > 0.1 && i < 256) {
                 delta > 0 ? position -= velocity / i : position += velocity / i;
                 i *= 2;
-                const auto newDelta = Position().Magnitude() + Radius - otherRadius;
-                if (std::abs(newDelta) > std::abs(delta)) {
-                    std::cout << "innerWallCollision whoops" << std::endl;
-                }
-                delta = newDelta;
+                delta = Position().Magnitude() + Radius - otherRadius;
             }
 
             return position.To2();
