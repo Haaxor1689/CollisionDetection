@@ -44,6 +44,10 @@ private:
     bool isStepping = false;
     bool isDebug = true;
 
+    int ballCount = 1;
+    int brickRowCount = 5;
+    int brickColumnCount = 8;
+
     // Attr and uniform locations
     GLint modelMatrixLoc = -1;
     GLint viewMatrixLoc = -1;
@@ -73,6 +77,13 @@ private:
     // Nuklear
     struct nk_context* ctx = nullptr;
     struct nk_font_atlas* atlas = nullptr;
+
+    int selectedBall = 0;
+    bool ballInfo = false;
+    int selectedPad = 0;
+    bool padInfo = false;
+    int selectedBrick = 0;
+    bool brickInfo = false;
 
     // Meshes
     Mesh cube = Mesh::Cube();

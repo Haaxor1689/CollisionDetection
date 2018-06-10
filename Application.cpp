@@ -126,7 +126,9 @@ void Application::Step() {
         }
         for (auto& brick : bricks) {
             // Mark brick for removal if collision occurs
-            brick->ShouldBeDeleted = ball.Collision(*brick);
+            if (ball.Collision(*brick)) {
+                brick->ShouldBeDeleted = true;
+            }
         }
         for (auto& otherBall : balls) {
             ball.Collision(otherBall);
@@ -203,53 +205,113 @@ void Application::Render() {
 }
 
 void Application::Gui() {
-    if (!isDebug) {
-        return;
-    }
-    if (nk_begin(ctx, "Debug", nk_rect(10, 10, 230, 420), NK_WINDOW_TITLE | NK_WINDOW_BORDER)) {
-        nk_layout_row_dynamic(ctx, 32, 1);
-        nk_label(ctx, "Ball", NK_TEXT_LEFT);
-        auto ballPosition = balls[0].Position();
-        const auto ballAngle = Geometry::Degrees(std::atan2(ballPosition.Z(), ballPosition.X()));
 
-        nk_layout_row_static(ctx, 26, 100, 2);
-        nk_label(ctx, "Position: ", NK_TEXT_LEFT);
-        nk_label(ctx, ("[" + Geometry::ToString(ballPosition.X(), 2) + ", " + Geometry::ToString(ballPosition.Z(), 2) + "]").c_str(), NK_TEXT_LEFT);
+    if (isDebug && nk_begin(ctx, "Debug", nk_rect(10, 10, 270, 520), NK_WINDOW_TITLE | NK_WINDOW_BORDER)) {
+        const auto infoLabelSize = 70;
+        const auto infoSliderSize = 135;
+        const auto infoButtonSize = 30;
+        const auto biColumnSize = 120;
 
-        nk_layout_row_static(ctx, 26, 100, 2);
-        nk_label(ctx, "Velocity: ", NK_TEXT_LEFT);
-        nk_label(ctx, ("[" + Geometry::ToString(balls[0].Velocity().X(), 2) + ", " + Geometry::ToString(balls[0].Velocity().Z(), 2) + "]").c_str(), NK_TEXT_LEFT);
+        // Balls
+        nk_layout_row_begin(ctx, NK_STATIC, 30, 3);
+        nk_layout_row_push(ctx, infoLabelSize);
+        nk_label(ctx, ("Ball(" + std::to_string(selectedBall) + ")").c_str(), NK_TEXT_LEFT);
+        nk_layout_row_push(ctx, infoSliderSize);
+        nk_slider_int(ctx, 0, &selectedBall, balls.size() - 1, 1);
+        nk_layout_row_push(ctx, infoButtonSize);
+        if (nk_button_label(ctx, ballInfo ? "-" : "+")) {
+            ballInfo = !ballInfo;
+        }
 
-        nk_layout_row_static(ctx, 26, 100, 2);
-        nk_label(ctx, "Distance: ", NK_TEXT_LEFT);
-        nk_label(ctx, std::to_string(ballPosition.Magnitude()).c_str(), NK_TEXT_LEFT);
+        if (ballInfo) {
+            auto ballPosition = balls[selectedBall].Position();
+            const auto ballAngle = Geometry::Degrees(std::atan2(ballPosition.Z(), ballPosition.X()));
 
-        nk_layout_row_static(ctx, 26, 100, 2);
-        nk_label(ctx, "Angle: ", NK_TEXT_LEFT);
-        nk_label(ctx, std::to_string(ballAngle).c_str(), NK_TEXT_LEFT);
+            nk_layout_row_static(ctx, 26, biColumnSize, 2);
+            nk_label(ctx, "Position: ", NK_TEXT_LEFT);
+            nk_label(ctx, ("[" + Geometry::ToString(ballPosition.X(), 2) + ", " + Geometry::ToString(ballPosition.Z(), 2) + "]").c_str(), NK_TEXT_LEFT);
 
-        nk_layout_row_dynamic(ctx, 32, 1);
-        nk_label(ctx, "Pad", NK_TEXT_LEFT);
-        const auto startAngle = Geometry::Degrees(pads[0].AngleStart());
-        const auto endAngle = Geometry::Degrees(pads[0].AngleEnd());
+            nk_layout_row_static(ctx, 26, biColumnSize, 2);
+            nk_label(ctx, "Velocity: ", NK_TEXT_LEFT);
+            nk_label(ctx, ("[" + Geometry::ToString(balls[selectedBall].Velocity().X(), 2) + ", " + Geometry::ToString(balls[selectedBall].Velocity().Z(), 2) + "]").c_str(), NK_TEXT_LEFT);
 
-        nk_layout_row_static(ctx, 26, 100, 2);
-        nk_label(ctx, "Distance: ", NK_TEXT_LEFT);
-        nk_label(ctx, std::to_string(pads[0].MiddleRadius()).c_str(), NK_TEXT_LEFT);
+            nk_layout_row_static(ctx, 26, biColumnSize, 2);
+            nk_label(ctx, "Distance: ", NK_TEXT_LEFT);
+            nk_label(ctx, std::to_string(ballPosition.Magnitude()).c_str(), NK_TEXT_LEFT);
 
-        nk_layout_row_static(ctx, 26, 100, 2);
-        nk_label(ctx, "Start Angle: ", NK_TEXT_LEFT);
-        nk_label(ctx, std::to_string(startAngle).c_str(), NK_TEXT_LEFT);
+            nk_layout_row_static(ctx, 26, biColumnSize, 2);
+            nk_label(ctx, "Angle: ", NK_TEXT_LEFT);
+            nk_label(ctx, std::to_string(ballAngle).c_str(), NK_TEXT_LEFT);
+        }
 
-        nk_layout_row_static(ctx, 26, 100, 2);
-        nk_label(ctx, "End Angle: ", NK_TEXT_LEFT);
-        nk_label(ctx, std::to_string(endAngle).c_str(), NK_TEXT_LEFT);
+        // Pads
+        nk_layout_row_begin(ctx, NK_STATIC, 30, 3);
+        nk_layout_row_push(ctx, infoLabelSize);
+        nk_label(ctx, ("Pad(" + std::to_string(selectedPad) + ")").c_str(), NK_TEXT_LEFT);
+        nk_layout_row_push(ctx, infoSliderSize);
+        nk_slider_int(ctx, 0, &selectedPad, pads.size() - 1, 1);
+        nk_layout_row_push(ctx, infoButtonSize);
+        if (nk_button_label(ctx, padInfo ? "-" : "+")) {
+            padInfo = !padInfo;
+        }
 
-        nk_layout_row_static(ctx, 26, 100, 2);
-        nk_label(ctx, "Movement: ", NK_TEXT_LEFT);
-        nk_label(ctx, Geometry::ToString(movement, 2).c_str(), NK_TEXT_LEFT);
+        if (padInfo) {
+            const auto startAngle = Geometry::Degrees(pads[selectedPad].AngleStart());
+            const auto endAngle = Geometry::Degrees(pads[selectedPad].AngleEnd());
 
-        nk_layout_row_static(ctx, 26, 100, 2);
+            nk_layout_row_static(ctx, 26, biColumnSize, 2);
+            nk_label(ctx, "Distance: ", NK_TEXT_LEFT);
+            nk_label(ctx, std::to_string(pads[selectedPad].MiddleRadius()).c_str(), NK_TEXT_LEFT);
+
+            nk_layout_row_static(ctx, 26, biColumnSize, 2);
+            nk_label(ctx, "Start Angle: ", NK_TEXT_LEFT);
+            nk_label(ctx, std::to_string(startAngle).c_str(), NK_TEXT_LEFT);
+
+            nk_layout_row_static(ctx, 26, biColumnSize, 2);
+            nk_label(ctx, "End Angle: ", NK_TEXT_LEFT);
+            nk_label(ctx, std::to_string(endAngle).c_str(), NK_TEXT_LEFT);
+
+            nk_layout_row_static(ctx, 26, biColumnSize, 2);
+            nk_label(ctx, "Movement: ", NK_TEXT_LEFT);
+            nk_label(ctx, Geometry::ToString(movement, 2).c_str(), NK_TEXT_LEFT);
+
+        }
+
+        // Bricks
+        nk_layout_row_begin(ctx, NK_STATIC, 30, 3);
+        nk_layout_row_push(ctx, infoLabelSize);
+        nk_label(ctx, ("Brick(" + std::to_string(selectedBrick) + ")").c_str(), NK_TEXT_LEFT);
+        nk_layout_row_push(ctx, infoSliderSize);
+        nk_slider_int(ctx, 0, &selectedBrick, bricks.size() - 1, 1);
+        nk_layout_row_push(ctx, infoButtonSize);
+        if (nk_button_label(ctx, brickInfo ? "-" : "+")) {
+            brickInfo = !brickInfo;
+        }
+
+        if (brickInfo) {
+            const auto startAngle = Geometry::Degrees(bricks[selectedBrick]->AngleStart());
+            const auto endAngle = Geometry::Degrees(bricks[selectedBrick]->AngleEnd());
+
+            nk_layout_row_static(ctx, 26, biColumnSize, 2);
+            nk_label(ctx, "Distance: ", NK_TEXT_LEFT);
+            nk_label(ctx, std::to_string(bricks[selectedBrick]->MiddleRadius()).c_str(), NK_TEXT_LEFT);
+
+            nk_layout_row_static(ctx, 26, biColumnSize, 2);
+            nk_label(ctx, "Start Angle: ", NK_TEXT_LEFT);
+            nk_label(ctx, std::to_string(startAngle).c_str(), NK_TEXT_LEFT);
+
+            nk_layout_row_static(ctx, 26, biColumnSize, 2);
+            nk_label(ctx, "End Angle: ", NK_TEXT_LEFT);
+            nk_label(ctx, std::to_string(endAngle).c_str(), NK_TEXT_LEFT);
+
+            nk_layout_row_static(ctx, 26, biColumnSize, 2);
+            nk_label(ctx, "Height: ", NK_TEXT_LEFT);
+            nk_label(ctx, Geometry::ToString(bricks[selectedBrick]->Height(), 2).c_str(), NK_TEXT_LEFT);
+
+        }
+
+        // Game control
+        nk_layout_row_static(ctx, 26, biColumnSize, 2);
         if (nk_button_label(ctx, isPaused ? "Play" : "Pause")) {
             isPaused = !isPaused;
         }
@@ -257,17 +319,30 @@ void Application::Gui() {
             isStepping = !isStepping;
         }
 
-        nk_layout_row_static(ctx, 26, 100, 2);
+        // Rules
+        nk_layout_row_static(ctx, 26, biColumnSize, 2);
+        nk_label(ctx, ("Balls(" + std::to_string(ballCount) + ")").c_str(), NK_TEXT_LEFT);
+        nk_slider_int(ctx, 1, &ballCount, 10, 1);
+
         if (nk_button_label(ctx, "Respawn balls")) {
             balls.clear();
             SpawnBalls();
         }
+
+        nk_layout_row_static(ctx, 26, biColumnSize, 2);
+        nk_label(ctx, ("Brick rows(" + std::to_string(brickRowCount) + ")").c_str(), NK_TEXT_LEFT);
+        nk_slider_int(ctx, 1, &brickRowCount, 10, 1);
+
+        nk_layout_row_static(ctx, 26, biColumnSize, 2);
+        nk_label(ctx, ("Brick columns(" + std::to_string(brickColumnCount) + ")").c_str(), NK_TEXT_LEFT);
+        nk_slider_int(ctx, 7, &brickColumnCount, 11, 1);
+
         if (nk_button_label(ctx, "Respawn bricks")) {
             bricks.clear();
             SpawnBricks();
         }
+        nk_end(ctx);
     }
-    nk_end(ctx);
 }
 
 void Application::DrawObject(const Mesh& mesh, const Collisions::Collider& collider) const {
@@ -301,25 +376,24 @@ void Application::SpawnBalls() {
     std::default_random_engine e(r());
     const std::uniform_real_distribution<float> pos(-5.f, 5.f);
     const std::uniform_real_distribution<float> vel(-0.5f, 0.5f);
-    for (unsigned i = 0; i < 1; ++i) {
+
+    balls.reserve(ballCount);
+    for (unsigned i = 0; i < ballCount; ++i) {
         balls.emplace_back(Geometry::Vector<3>{ pos(e), 1.f, pos(e) }, Geometry::Vector<3>{ vel(e), 0.f, vel(e) }, 1.f);
     }
 }
 
 void Application::SpawnBricks() {
-    unsigned rows = 5;
-    unsigned columns = 8;
-    bricks.reserve(rows * columns);
-
+    bricks.reserve(brickRowCount * brickColumnCount);
     unsigned index = 0;
-    for (float i = 0; i < rows; ++i) {
-        float offset = i * 0.4f;
-        float height = i * BRICK_HEIGHT;
-        for (unsigned j = 0; j < columns; ++j) {
-            bricks.emplace_back(std::make_unique<Collisions::BrickCollider>(BRICK_DISTANCE, BRICK_SEGMENTS, 2.f * j * Geometry::pi / columns + offset, height));
-            if (index >= columns) {
-                auto first = index - columns;
-                auto second = index - (index % columns == columns - 1 ? 2 * columns - 1 : columns - 1);
+    for (float i = 0; i < brickRowCount; ++i) {
+        const auto offset = i * 0.4f;
+        const auto height = i * BRICK_HEIGHT;
+        for (unsigned j = 0; j < brickColumnCount; ++j) {
+            bricks.emplace_back(std::make_unique<Collisions::BrickCollider>(BRICK_DISTANCE, BRICK_SEGMENTS, 2.f * j * Geometry::pi / brickColumnCount + offset, height));
+            if (index >= brickColumnCount) {
+                const auto first = index - brickColumnCount;
+                const auto second = index - (index % brickColumnCount == brickColumnCount - 1 ? 2 * brickColumnCount - 1 : brickColumnCount - 1);
                 bricks[index]->SetParents(bricks[first].get(), bricks[second].get());
             }
             ++index;
@@ -361,10 +435,12 @@ void Application::OnKey(int key, int scancode, int actions, int mods) {
         if (actions == GLFW_PRESS) {
             isDebug = !isDebug;
         }
+        break;
     case GLFW_KEY_SPACE:
         if (actions == GLFW_PRESS) {
             isPaused = !isPaused;
         }
+        break;
     default:
         break;
     }
