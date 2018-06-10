@@ -204,10 +204,10 @@ void Application::Render() {
 }
 
 void Application::Gui() {
-    unsigned controllsWindowY = 50;
+    unsigned nextWindowY = 10;
     // Debug window
-    if (nk_begin(ctx, "Debug", nk_rect(10, 10, 270, 330), NK_WINDOW_TITLE | NK_WINDOW_BORDER | NK_WINDOW_MINIMIZABLE)) {
-        controllsWindowY = 350;
+    if (nk_begin(ctx, "Debug", nk_rect(10, nextWindowY, 270, 180), NK_WINDOW_TITLE | NK_WINDOW_BORDER | NK_WINDOW_MINIMIZABLE)) {
+        nextWindowY += 150;
 
         const auto infoLabelSize = 70;
         const auto infoSliderSize = 135;
@@ -320,6 +320,15 @@ void Application::Gui() {
         if (nk_button_label(ctx, isStepping ? "Step On" : "Step Off")) {
             isStepping = !isStepping;
         }
+    }
+    nk_end(ctx);
+
+    nextWindowY += 40;
+
+    if (nk_begin(ctx, "Game rules", nk_rect(10, nextWindowY, 270, 200), NK_WINDOW_TITLE | NK_WINDOW_BORDER | NK_WINDOW_MINIMIZABLE)) {
+        nextWindowY += 170;
+
+        const auto biColumnSize = 120;
 
         // Rules
         nk_layout_row_static(ctx, 26, biColumnSize, 2);
@@ -344,7 +353,9 @@ void Application::Gui() {
     }
     nk_end(ctx);
 
-    if (nk_begin(ctx, "Controlls", nk_rect(10, controllsWindowY, 270, 140), NK_WINDOW_TITLE | NK_WINDOW_BORDER | NK_WINDOW_MINIMIZABLE)) {
+    nextWindowY += 40;
+
+    if (nk_begin(ctx, "Controlls", nk_rect(10, nextWindowY, 270, 170), NK_WINDOW_TITLE | NK_WINDOW_BORDER | NK_WINDOW_MINIMIZABLE)) {
         const auto labelSize = 140;
         const auto keySize = 100;
         
@@ -365,6 +376,12 @@ void Application::Gui() {
         nk_label(ctx, "Restart:", NK_TEXT_LEFT);
         nk_layout_row_push(ctx, keySize);
         nk_label(ctx, "R", NK_TEXT_LEFT);
+
+        nk_layout_row_begin(ctx, NK_STATIC, 26, 2);
+        nk_layout_row_push(ctx, labelSize);
+        nk_label(ctx, "Change camera:", NK_TEXT_LEFT);
+        nk_layout_row_push(ctx, keySize);
+        nk_label(ctx, "C", NK_TEXT_LEFT);
     }
     nk_end(ctx);
 }
