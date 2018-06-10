@@ -1,6 +1,5 @@
 #include "Application.hpp"
 
-#include <iostream>
 #include <random>
 
 #define NK_INCLUDE_FIXED_TYPES
@@ -205,8 +204,11 @@ void Application::Render() {
 }
 
 void Application::Gui() {
+    unsigned controllsWindowY = 50;
+    // Debug window
+    if (nk_begin(ctx, "Debug", nk_rect(10, 10, 270, 330), NK_WINDOW_TITLE | NK_WINDOW_BORDER | NK_WINDOW_MINIMIZABLE)) {
+        controllsWindowY = 350;
 
-    if (isDebug && nk_begin(ctx, "Debug", nk_rect(10, 10, 270, 520), NK_WINDOW_TITLE | NK_WINDOW_BORDER)) {
         const auto infoLabelSize = 70;
         const auto infoSliderSize = 135;
         const auto infoButtonSize = 30;
@@ -325,7 +327,6 @@ void Application::Gui() {
         nk_slider_int(ctx, 1, &ballCount, 10, 1);
 
         if (nk_button_label(ctx, "Respawn balls")) {
-            balls.clear();
             SpawnBalls();
         }
 
@@ -338,11 +339,34 @@ void Application::Gui() {
         nk_slider_int(ctx, 7, &brickColumnCount, 11, 1);
 
         if (nk_button_label(ctx, "Respawn bricks")) {
-            bricks.clear();
             SpawnBricks();
         }
-        nk_end(ctx);
     }
+    nk_end(ctx);
+
+    if (nk_begin(ctx, "Controlls", nk_rect(10, controllsWindowY, 270, 140), NK_WINDOW_TITLE | NK_WINDOW_BORDER | NK_WINDOW_MINIMIZABLE)) {
+        const auto labelSize = 140;
+        const auto keySize = 100;
+        
+        nk_layout_row_begin(ctx, NK_STATIC, 26, 2);
+        nk_layout_row_push(ctx, labelSize);
+        nk_label(ctx, "Rotate pads:", NK_TEXT_LEFT);
+        nk_layout_row_push(ctx, keySize);
+        nk_label(ctx, "A/D", NK_TEXT_LEFT);
+
+        nk_layout_row_begin(ctx, NK_STATIC, 26, 2);
+        nk_layout_row_push(ctx, labelSize);
+        nk_label(ctx, "Play/Pause:", NK_TEXT_LEFT);
+        nk_layout_row_push(ctx, keySize);
+        nk_label(ctx, "Space", NK_TEXT_LEFT);
+
+        nk_layout_row_begin(ctx, NK_STATIC, 26, 2);
+        nk_layout_row_push(ctx, labelSize);
+        nk_label(ctx, "Restart:", NK_TEXT_LEFT);
+        nk_layout_row_push(ctx, keySize);
+        nk_label(ctx, "R", NK_TEXT_LEFT);
+    }
+    nk_end(ctx);
 }
 
 void Application::DrawObject(const Mesh& mesh, const Collisions::Collider& collider) const {
@@ -372,6 +396,7 @@ void Application::DrawObject(const Mesh& mesh, const Collisions::Collider& colli
 }
 
 void Application::SpawnBalls() {
+    balls.clear();
     const auto ballRadius = 1.f;
     const auto maxVelocity = 1.f;
     std::random_device r;
@@ -389,6 +414,7 @@ void Application::SpawnBalls() {
 }
 
 void Application::SpawnBricks() {
+    bricks.clear();
     bricks.reserve(brickRowCount * brickColumnCount);
     auto index = 0;
     for (float i = 0; i < brickRowCount; ++i) {
@@ -436,9 +462,11 @@ void Application::OnKey(int key, int scancode, int actions, int mods) {
             movement -= movementSpeed;
         }
         return;
-    case GLFW_KEY_F1:
+    case GLFW_KEY_R:
         if (actions == GLFW_PRESS) {
-            isDebug = !isDebug;
+            SpawnBalls();
+            SpawnBricks();
+            isPaused = true;
         }
         break;
     case GLFW_KEY_SPACE:

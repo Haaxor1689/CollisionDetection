@@ -42,7 +42,6 @@ private:
 
     bool isPaused = true;
     bool isStepping = false;
-    bool isDebug = true;
 
     int ballCount = 1;
     int brickRowCount = 5;

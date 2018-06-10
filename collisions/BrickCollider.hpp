@@ -1,7 +1,5 @@
 #pragma once
 
-#include <iostream>
-
 #include "Collider.hpp"
 #include "objects.inl"
 
