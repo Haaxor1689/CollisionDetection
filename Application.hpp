@@ -40,7 +40,7 @@ private:
 
     Camera camera;
 
-    bool isPaused = false;
+    bool isPaused = true;
     bool isStepping = false;
     bool isDebug = true;
 
@@ -84,7 +84,7 @@ private:
     // Colliders
     std::vector<Collisions::BallCollider> balls{};
     std::vector<Collisions::BrickCollider> pads{};
-    std::vector<Collisions::BrickCollider> bricks{};
+    std::vector<std::unique_ptr<Collisions::BrickCollider>> bricks{};
     Collisions::BoundsCollider bounds = { RADIUS };
 
     // Player input
@@ -93,6 +93,7 @@ private:
 
     void DrawObject(const Mesh& mesh, const Collisions::Collider& collider) const;
     void SpawnBalls();
+    void SpawnBricks();
 
     static void OnKey(GLFWwindow* window, int key, int scancode, int actions, int mods) {
         auto thisPointer = static_cast<Application*>(glfwGetWindowUserPointer(window));

@@ -83,18 +83,12 @@ void Application::Init() {
 
     // Objects
     SpawnBalls();
+    SpawnBricks();
 
     pads.emplace_back(PAD_DISTANCE, PAD_SEGMENTS, 0.f);
     pads.emplace_back(PAD_DISTANCE, PAD_SEGMENTS, 2.f * Geometry::pi / 3.f);
     pads.emplace_back(PAD_DISTANCE, PAD_SEGMENTS, 4.f * Geometry::pi / 3.f);
 
-    // for (float i = 0; i < 1.f; ++i) {
-    //     float offset = i * 1.9f;
-    //     float height = i * BRICK_HEIGHT;
-    //     for (int j = 0; j < 8; ++j) {
-    //         bricks.emplace_back(BRICK_DISTANCE, BRICK_SEGMENTS, 2.f * j * Geometry::pi / 8.f + offset, height);
-    //     }
-    // }
 }
 
 void Application::Step() {
@@ -105,6 +99,14 @@ void Application::Step() {
     if (isStepping) {
         isPaused = true;
     }
+
+    for (auto& brick : bricks) {
+        // Drop down hnging bricks
+        brick->Drop();
+    }
+
+    // Remove destroyed bricks
+    bricks.erase(std::remove_if(bricks.begin(), bricks.end(), [](const auto& brick) { return brick->ShouldBeDeleted; }), bricks.end());
 
     // Move all balls
     for (auto& ball : balls) {
@@ -123,7 +125,8 @@ void Application::Step() {
             ball.Collision(pad);
         }
         for (auto& brick : bricks) {
-            ball.Collision(brick);
+            // Mark brick for removal if collision occurs
+            brick->ShouldBeDeleted = ball.Collision(*brick);
         }
         for (auto& otherBall : balls) {
             ball.Collision(otherBall);
@@ -193,7 +196,7 @@ void Application::Render() {
     }
 
     for (auto& brickCol : bricks) {
-        DrawObject(brick, brickCol);
+        DrawObject(brick, *brickCol);
     }
 
     nk_glfw3_render(NK_ANTI_ALIASING_ON, 512 * 1024, 128 * 1024);
@@ -254,9 +257,14 @@ void Application::Gui() {
             isStepping = !isStepping;
         }
 
+        nk_layout_row_static(ctx, 26, 100, 2);
         if (nk_button_label(ctx, "Respawn balls")) {
             balls.clear();
             SpawnBalls();
+        }
+        if (nk_button_label(ctx, "Respawn bricks")) {
+            bricks.clear();
+            SpawnBricks();
         }
     }
     nk_end(ctx);
@@ -298,6 +306,27 @@ void Application::SpawnBalls() {
     }
 }
 
+void Application::SpawnBricks() {
+    unsigned rows = 5;
+    unsigned columns = 8;
+    bricks.reserve(rows * columns);
+
+    unsigned index = 0;
+    for (float i = 0; i < rows; ++i) {
+        float offset = i * 0.4f;
+        float height = i * BRICK_HEIGHT;
+        for (unsigned j = 0; j < columns; ++j) {
+            bricks.emplace_back(std::make_unique<Collisions::BrickCollider>(BRICK_DISTANCE, BRICK_SEGMENTS, 2.f * j * Geometry::pi / columns + offset, height));
+            if (index >= columns) {
+                auto first = index - columns;
+                auto second = index - (index % columns == columns - 1 ? 2 * columns - 1 : columns - 1);
+                bricks[index]->SetParents(bricks[first].get(), bricks[second].get());
+            }
+            ++index;
+        }
+    }
+}
+
 void Application::OnMousePosition(double x, double y) {
     camera.OnMouseMove(x, y);
 }
@@ -331,6 +360,10 @@ void Application::OnKey(int key, int scancode, int actions, int mods) {
     case GLFW_KEY_F1:
         if (actions == GLFW_PRESS) {
             isDebug = !isDebug;
+        }
+    case GLFW_KEY_SPACE:
+        if (actions == GLFW_PRESS) {
+            isPaused = !isPaused;
         }
     default:
         break;

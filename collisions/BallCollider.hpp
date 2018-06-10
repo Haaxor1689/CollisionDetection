@@ -63,9 +63,9 @@ public:
         other.velocity = { newVelX2, 0.f, newVelZ2 };
     }
 
-    void Collision(const BrickCollider& other) {
+    bool Collision(const BrickCollider& other) {
         if (other.Height() != 0) {
-            return;
+            return false;
         }
 
         const auto mag = position.Magnitude();
@@ -165,7 +165,7 @@ public:
         };
 
         if (!didCollide()) {
-            return;
+            return false;
         }
 
         Geometry::Vector<2> normal;
@@ -201,6 +201,7 @@ public:
         if (isInRing() || !isInCone()) {
             position += other.Velocity(position) * movementMultiplier;
         }
+        return true;
     }
 
     void Collision(const BoundsCollider& other) {

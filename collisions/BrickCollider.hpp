@@ -13,6 +13,9 @@ class BrickCollider : public Collider {
     float angleStart;
     float height;
     float angularVelocity = 0.f;
+    
+    BrickCollider* firstParent = nullptr;
+    BrickCollider* secondParent = nullptr;
 
 public:
     BrickCollider(float distance, unsigned segmentsCount, float angle = 0.f, float height = 0.f)
@@ -51,6 +54,23 @@ public:
     Geometry::Vector<3> InnerEndCorner() const { return Geometry::Vector<3>{ InnerRadius(), 1.f, 0.f }.Rotate(-AngleEnd(), { 0.f, 1.f, 0.f }); }
     Geometry::Vector<3> OuterStartCorner() const { return Geometry::Vector<3>{ OuterRadius(), 1.f, 0.f }.Rotate(-AngleStart(), { 0.f, 1.f, 0.f }); }
     Geometry::Vector<3> OuterEndCorner() const { return Geometry::Vector<3>{ OuterRadius(), 1.f, 0.f }.Rotate(-AngleEnd(), { 0.f, 1.f, 0.f }); }
+    
+    bool ShouldBeDeleted = false;
+
+    void SetParents(BrickCollider* first, BrickCollider* second) {
+        firstParent = first;
+        secondParent = second;
+    }
+
+    void Drop() {
+        if (firstParent && firstParent->ShouldBeDeleted) {
+            firstParent = firstParent->secondParent;
+        }
+        if (secondParent && secondParent->ShouldBeDeleted) {
+            secondParent = secondParent->firstParent;
+        }
+        height = std::max(firstParent ? firstParent->height : -BRICK_HEIGHT, secondParent ? secondParent->height : -BRICK_HEIGHT) + BRICK_HEIGHT;
+    }
 };
 
 } // namespace Collisions
