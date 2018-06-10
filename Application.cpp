@@ -372,24 +372,29 @@ void Application::DrawObject(const Mesh& mesh, const Collisions::Collider& colli
 }
 
 void Application::SpawnBalls() {
+    const auto ballRadius = 1.f;
+    const auto maxVelocity = 1.f;
     std::random_device r;
     std::default_random_engine e(r());
-    const std::uniform_real_distribution<float> pos(-5.f, 5.f);
-    const std::uniform_real_distribution<float> vel(-0.5f, 0.5f);
+    const std::uniform_real_distribution<float> dist(BRICK_DISTANCE + BRICK_WIDTH + ballRadius * 2, PAD_DISTANCE - ballRadius * 2);
+    const std::uniform_real_distribution<float> angle(-Geometry::pi, Geometry::pi);
+    const std::uniform_real_distribution<float> vel(0.5f, 1.0f);
 
     balls.reserve(ballCount);
-    for (unsigned i = 0; i < ballCount; ++i) {
-        balls.emplace_back(Geometry::Vector<3>{ pos(e), 1.f, pos(e) }, Geometry::Vector<3>{ vel(e), 0.f, vel(e) }, 1.f);
+    for (auto i = 0; i < ballCount; ++i) {
+        auto position = Geometry::Vector<3>{ dist(e), 1.f, 0.f }.Rotate(angle(e), { 0.f, 1.f, 0.f });
+        auto velocity = Geometry::Vector<3>::Normalized(position) * maxVelocity * vel(e);
+        balls.emplace_back(std::move(position), std::move(velocity), ballRadius, maxVelocity);
     }
 }
 
 void Application::SpawnBricks() {
     bricks.reserve(brickRowCount * brickColumnCount);
-    unsigned index = 0;
+    auto index = 0;
     for (float i = 0; i < brickRowCount; ++i) {
         const auto offset = i * 0.4f;
         const auto height = i * BRICK_HEIGHT;
-        for (unsigned j = 0; j < brickColumnCount; ++j) {
+        for (auto j = 0; j < brickColumnCount; ++j) {
             bricks.emplace_back(std::make_unique<Collisions::BrickCollider>(BRICK_DISTANCE, BRICK_SEGMENTS, 2.f * j * Geometry::pi / brickColumnCount + offset, height));
             if (index >= brickColumnCount) {
                 const auto first = index - brickColumnCount;

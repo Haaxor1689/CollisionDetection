@@ -15,12 +15,14 @@ class BallCollider : public Collider {
 public:
     const float Radius;
     const float Mass;
+    const float MaxVelocity;
 
-    BallCollider(Geometry::Vector<3>&& position, Geometry::Vector<3>&& velocity, float radius)
+    BallCollider(Geometry::Vector<3>&& position, Geometry::Vector<3>&& velocity, float radius, float maxVelocity)
         : position(std::move(position)),
           velocity(std::move(velocity)),
           Radius(radius),
-          Mass(4 * Geometry::pi * radius * radius * radius * 11.34f / 3) {}
+          Mass(4 * Geometry::pi * radius * radius * radius * 11.34f / 3),
+          MaxVelocity(maxVelocity) {}
 
     // Visitors
     void Visit(ColliderVisitor& visitor) override { visitor(*this); }
@@ -28,7 +30,8 @@ public:
 
     void Step() {
         position += velocity;
-        if (velocity.Magnitude() > 1.f) {
+
+        if (velocity.Magnitude() > MaxVelocity) {
             velocity *= 0.9;
         }
     }
@@ -89,7 +92,7 @@ public:
             const auto line = Geometry::Vector<2>{ cos(lineAngle), sin(lineAngle) };
             return (minusPosition - Geometry::Vector<2>::Dot(minusPosition, line) * line).Magnitude();
         };
-        
+
         const auto isInRing = [&]() { return mag < other.OuterRadius() && mag > other.InnerRadius(); };
         const auto isInCone = [&]() { return positionAngle < otherStart && positionAngle > otherEnd; };
         const auto isInMiddle = [&]() { return mag < other.OuterRadius() + Radius && mag > other.InnerRadius() - Radius && isInCone(); };
