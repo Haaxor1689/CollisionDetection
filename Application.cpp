@@ -98,6 +98,10 @@ void Application::Init() {
 }
 
 void Application::Step() {
+    for (auto& pad : pads) {
+        pad.Rotate(movement);
+    }
+
     if (isPaused) {
         return;
     }
@@ -120,10 +124,6 @@ void Application::Step() {
         for (auto& otherBall : balls) {
             ball.Collision(otherBall);
         }
-    }
-
-    for (auto& pad : pads) {
-        pad.Rotate(movement);
     }
 }
 

@@ -63,100 +63,127 @@ public:
             return;
         }
 
+        const auto mag = position.Magnitude();
+        const auto positionAngle = std::atan2(position.Z(), position.X());
+        auto otherStart = other.AngleStart();
+        auto otherEnd = other.AngleEnd();
+
+        // In case end angle is smaller than -pi and ball is on positive angle, rotate pad to positive numbers
+        if (otherEnd < -Geometry::pi / 2 && positionAngle > 0.f) {
+            otherStart += 2 * Geometry::pi;
+            otherEnd += 2 * Geometry::pi;
+        } else if (otherStart > Geometry::pi / 2 && positionAngle < 0.f) {
+            otherStart -= 2 * Geometry::pi;
+            otherEnd -= 2 * Geometry::pi;
+        }
+
         // Local lambda helpers
-        const auto cornerCollision = [&](const Geometry::Vector<3>& corner)
-        {
-            // int i = 2;
-            // while (Radius - dist > 0.1) {
-            //     Radius > dist ? position -= velocity / i : position += velocity / i;
-            //     i *= 2;
-            //     dist = Geometry::Vector<3>::Distance(corner, position);
-            // }
-
-            return (corner - position).To2().Normalize();
-        };
-
-        const auto sideWallCollision = [](const float lineAngle)
-        {
-            // int i = 2;
-            // while (Radius - dist > 0.1) {
-            //     Radius > dist ? position -= velocity / i : position += velocity / i;
-            //     i *= 2;
-            //     dist = Geometry::Vector<3>::Distance(corner, position);
-            // }
-
-            return Geometry::Vector<2>{ sin(lineAngle), -cos(lineAngle) }.Invert();
-            
-        };
-
-        const auto distanceToLine = [&](const float lineAngle) 
+        const auto distanceToLine = [&](const float lineAngle)
         {
             const auto minusPosition = Geometry::Vector<2>() - position.To2();
             const auto line = Geometry::Vector<2>{ cos(lineAngle), sin(lineAngle) };
             return (minusPosition - Geometry::Vector<2>::Dot(minusPosition, line) * line).Magnitude();
         };
 
-        const auto mag = position.Magnitude();
+        const auto didCollide = [&]()
+        {
+            const auto isInCone = [&]() { return positionAngle < otherStart && positionAngle > otherEnd; };
+            const auto isInMiddle = [&]() { return mag < other.OuterRadius() + Radius && mag > other.InnerRadius() - Radius && isInCone(); };
+            const auto isOnStartWall = [&]() { return positionAngle > otherStart && distanceToLine(otherStart) < Radius && std::abs(positionAngle - otherStart) < Geometry::pi / 2; };
+            const auto isOnEndWall = [&]() { return positionAngle < otherEnd && distanceToLine(otherEnd) < Radius && std::abs(positionAngle - otherEnd) < Geometry::pi / 2; };
+            const auto isOnSide = [&]() { return mag < other.OuterRadius() && mag > other.InnerRadius() && (isOnStartWall() || isOnEndWall()); };
+            const auto isOnCorner = [&]()
+            {
+                auto corners = { other.InnerStartCorner(), other.InnerEndCorner(), other.OuterStartCorner(), other.OuterEndCorner() };
+                return std::any_of(corners.begin(), corners.end(), [&](const auto& corner) { return Geometry::Vector<3>::Distance(corner, position) < Radius; });
+            };
 
-        // Return if ball isn't inside the ring
-        if (mag > other.OuterRadius() + Radius || mag < other.InnerRadius() - Radius) {
+            return isInMiddle() || isOnSide() || isOnCorner();
+        };
+
+        const auto cornerCollision = [&](const Geometry::Vector<3>& corner)
+        {
+            const auto dist = Geometry::Vector<3>::Distance(position, corner);
+            position += (position - corner) * (Radius - dist) / dist;
+            if (std::abs(Geometry::Vector<3>::Distance(position, corner) - Radius) > 0.1f) {
+                std::cout << "fuck" << std::endl;
+            }
+
+            return (corner - position).To2().Normalize();
+        };
+        const auto sideWallCollision = [&](const float lineAngle)
+        {
+            auto delta = distanceToLine(lineAngle) - Radius;
+            unsigned i = 2;
+            while (std::abs(delta) > 0.1 && i < 256) {
+                delta < 0 ? position -= velocity / i : position += velocity / i;
+                i *= 2;
+                const auto newDelta = distanceToLine(lineAngle) - Radius;
+                if (std::abs(newDelta) > std::abs(delta)) {
+                    std::cout << "sideWallCollision whoops" << std::endl;
+                }
+                delta = newDelta;
+            }
+
+            return Geometry::Vector<2>{ sin(lineAngle), -cos(lineAngle) }.Invert();
+        };
+        const auto outerWallCollision = [&](const float otherRadius)
+        {
+            auto delta = Position().Magnitude() - Radius - otherRadius;
+            unsigned i = 2;
+            while (std::abs(delta) > 0.1 && i < 256) {
+                delta < 0 ? position -= velocity / i : position += velocity / i;
+                i *= 2;
+                const auto newDelta = Position().Magnitude() - Radius - otherRadius;
+                if (std::abs(newDelta) > std::abs(delta)) {
+                    std::cout << "outerWallCollision whoops" << std::endl;
+                }
+                delta = newDelta;
+            }
+            return position.To2().Invert();
+        };
+        const auto innerWallCollision = [&](const float otherRadius)
+        {
+            auto delta = Position().Magnitude() + Radius - otherRadius;
+            unsigned i = 2;
+            while (std::abs(delta) > 0.1 && i < 256) {
+                delta > 0 ? position -= velocity / i : position += velocity / i;
+                i *= 2;
+                const auto newDelta = Position().Magnitude() + Radius - otherRadius;
+                if (std::abs(newDelta) > std::abs(delta)) {
+                    std::cout << "innerWallCollision whoops" << std::endl;
+                }
+                delta = newDelta;
+            }
+
+            return position.To2();
+        };
+
+        if (!didCollide()) {
             return;
-        }
-
-        const auto positionAngle = std::atan2(position.Z(), position.X());
-        auto otherStart = other.AngleStart();
-        auto otherEnd = other.AngleEnd();
-
-        if (std::abs(positionAngle - otherStart) > Geometry::pi) {
-            return;
-        }
-
-        // In case end angle is smaller than -pi and ball is on positive angle, rotate pad to positive numbers
-        if (otherEnd < -Geometry::pi && positionAngle > 0.f) {
-            otherStart += 2 * Geometry::pi;
-            otherEnd += 2 * Geometry::pi;
         }
 
         Geometry::Vector<2> normal;
         if (positionAngle > otherStart) {
-            const auto minusPosition = Geometry::Vector<2>() - position.To2();
-            if (distanceToLine(otherStart) > Radius || std::abs(positionAngle - otherStart) > 0.5) {
-                // It's too far from side walls
-                return;
-            }
-
-            if (mag > other.OuterRadius() && Geometry::Vector<3>::Distance(other.OuterStartCorner(), position) < Radius) {
-                std::cout << "outer start collision" << std::endl;
+            if (mag > other.OuterRadius()) {
                 normal = cornerCollision(other.OuterStartCorner());
-            } else if (mag < other.InnerRadius() && Geometry::Vector<3>::Distance(other.InnerStartCorner(), position) < Radius) {
-                std::cout << "inner start collision" << std::endl;
+            } else if (mag < other.InnerRadius()) {
                 normal = cornerCollision(other.InnerStartCorner());
             } else {
-                std::cout << "start wall collision" << std::endl;
                 normal = sideWallCollision(otherStart);
             }
         } else if (positionAngle < otherEnd) {
-            if (distanceToLine(otherEnd) > Radius || std::abs(positionAngle - otherEnd) > 0.5) {
-                // It's too far from side walls
-                return;
-            }
-
-            if (mag > other.OuterRadius() && Geometry::Vector<3>::Distance(other.OuterEndCorner(), position) < Radius) {
-                std::cout << "outer end collision" << std::endl;
+            if (mag > other.OuterRadius()) {
                 normal = cornerCollision(other.OuterEndCorner());
-            } else if (mag < other.InnerRadius() && Geometry::Vector<3>::Distance(other.InnerEndCorner(), position) < Radius) {
-                std::cout << "inner end collision" << std::endl;
+            } else if (mag < other.InnerRadius()) {
                 normal = cornerCollision(other.InnerEndCorner());
             } else {
-                std::cout << "end wall collision" << std::endl;
                 normal = sideWallCollision(otherEnd);
             }
         } else if (mag > other.MiddleRadius()) {
-            std::cout << "outer wall collision" << std::endl;
-            normal = position.To2();
+            normal = outerWallCollision(other.OuterRadius());
         } else {
-            std::cout << "inner wall collision" << std::endl;
-            normal = position.To2().Invert();
+            normal = innerWallCollision(other.InnerRadius());
         }
 
         normal.Normalize();

@@ -237,23 +237,23 @@ public:
         return (lhs - rhs).Magnitude();
     }
 
-    Vector<2> To2() { return { data[0], data[2] }; }
-    Vector<3> To3() { return { data[0], data[1], data[2] }; }
-    Vector<4> To4() { return { data[0], data[1], data[2], data[3] }; }
+    Vector<2> To2() const { return { data[0], data[2] }; }
+    Vector<3> To3() const { return { data[0], data[1], data[2] }; }
+    Vector<4> To4() const { return { data[0], data[1], data[2], data[3] }; }
 };
 
 template <>
-inline Vector<3> Vector<2>::To3() {
+inline Vector<3> Vector<2>::To3() const {
     return { data[0], 0.f, data[1] };
 }
 
 template <>
-inline Vector<4> Vector<2>::To4() {
+inline Vector<4> Vector<2>::To4() const {
     return { data[0], 0.f, data[2], 1.f };
 }
 
 template <>
-inline Vector<4> Vector<3>::To4() {
+inline Vector<4> Vector<3>::To4() const {
     return { data[0], data[1], data[2], 1.f };
 }
 
