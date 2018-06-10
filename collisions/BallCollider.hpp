@@ -26,7 +26,12 @@ public:
     void Visit(ColliderVisitor& visitor) override { visitor(*this); }
     void Visit(ConstColliderVisitor& visitor) const override { visitor(*this); }
 
-    void Step() { position += velocity; }
+    void Step() {
+        position += velocity;
+        if (velocity.Magnitude() > 1.f) {
+            velocity *= 0.9;
+        }
+    }
 
     const Geometry::Vector<3>& Position() const { return position; }
     const Geometry::Vector<3>& Velocity() const { return velocity; }
@@ -84,20 +89,20 @@ public:
             const auto line = Geometry::Vector<2>{ cos(lineAngle), sin(lineAngle) };
             return (minusPosition - Geometry::Vector<2>::Dot(minusPosition, line) * line).Magnitude();
         };
-
+        
+        const auto isInRing = [&]() { return mag < other.OuterRadius() && mag > other.InnerRadius(); };
+        const auto isInCone = [&]() { return positionAngle < otherStart && positionAngle > otherEnd; };
+        const auto isInMiddle = [&]() { return mag < other.OuterRadius() + Radius && mag > other.InnerRadius() - Radius && isInCone(); };
+        const auto isOnStartWall = [&]() { return positionAngle > otherStart && distanceToLine(otherStart) < Radius && std::abs(positionAngle - otherStart) < Geometry::pi / 2; };
+        const auto isOnEndWall = [&]() { return positionAngle < otherEnd && distanceToLine(otherEnd) < Radius && std::abs(positionAngle - otherEnd) < Geometry::pi / 2; };
+        const auto isOnSide = [&]() { return isInRing() && (isOnStartWall() || isOnEndWall()); };
+        const auto isOnCorner = [&]()
+        {
+            auto corners = { other.InnerStartCorner(), other.InnerEndCorner(), other.OuterStartCorner(), other.OuterEndCorner() };
+            return std::any_of(corners.begin(), corners.end(), [&](const auto& corner) { return Geometry::Vector<3>::Distance(corner, position) < Radius; });
+        };
         const auto didCollide = [&]()
         {
-            const auto isInCone = [&]() { return positionAngle < otherStart && positionAngle > otherEnd; };
-            const auto isInMiddle = [&]() { return mag < other.OuterRadius() + Radius && mag > other.InnerRadius() - Radius && isInCone(); };
-            const auto isOnStartWall = [&]() { return positionAngle > otherStart && distanceToLine(otherStart) < Radius && std::abs(positionAngle - otherStart) < Geometry::pi / 2; };
-            const auto isOnEndWall = [&]() { return positionAngle < otherEnd && distanceToLine(otherEnd) < Radius && std::abs(positionAngle - otherEnd) < Geometry::pi / 2; };
-            const auto isOnSide = [&]() { return mag < other.OuterRadius() && mag > other.InnerRadius() && (isOnStartWall() || isOnEndWall()); };
-            const auto isOnCorner = [&]()
-            {
-                auto corners = { other.InnerStartCorner(), other.InnerEndCorner(), other.OuterStartCorner(), other.OuterEndCorner() };
-                return std::any_of(corners.begin(), corners.end(), [&](const auto& corner) { return Geometry::Vector<3>::Distance(corner, position) < Radius; });
-            };
-
             return isInMiddle() || isOnSide() || isOnCorner();
         };
 
@@ -164,6 +169,7 @@ public:
         }
 
         Geometry::Vector<2> normal;
+        const float movementMultiplier = isInRing() ? 1.1f : 0.2f;
         if (positionAngle > otherStart) {
             if (mag > other.OuterRadius()) {
                 normal = cornerCollision(other.OuterStartCorner());
@@ -191,6 +197,10 @@ public:
 
         // Set new velocity
         velocity = (2.f * Geometry::Vector<2>::Dot(velocity2D, normal) * normal - velocity2D).To3();
+        velocity += other.Velocity(position) * movementMultiplier;
+        if (isInRing() || !isInCone()) {
+            position += other.Velocity(position) * movementMultiplier;
+        }
     }
 
     void Collision(const BoundsCollider& other) {

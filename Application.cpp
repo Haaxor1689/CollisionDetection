@@ -80,39 +80,43 @@ void Application::Init() {
     ctx = nk_glfw3_init(Window.GetWindow(), NK_GLFW3_INSTALL_CALLBACKS);
     nk_glfw3_font_stash_begin(&atlas);
     nk_glfw3_font_stash_end();
-    
+
     // Objects
     SpawnBalls();
 
     pads.emplace_back(PAD_DISTANCE, PAD_SEGMENTS, 0.f);
-    // pads.emplace_back(PAD_DISTANCE, PAD_SEGMENTS, 2.f * Geometry::pi / 3.f);
-    // pads.emplace_back(PAD_DISTANCE, PAD_SEGMENTS, 4.f * Geometry::pi / 3.f);
+    pads.emplace_back(PAD_DISTANCE, PAD_SEGMENTS, 2.f * Geometry::pi / 3.f);
+    pads.emplace_back(PAD_DISTANCE, PAD_SEGMENTS, 4.f * Geometry::pi / 3.f);
 
-    for (float i = 0; i < 1.f; ++i) {
-        float offset = i * 1.9f;
-        float height = i * BRICK_HEIGHT;
-        for (int j = 0; j < 8; ++j) {
-            bricks.emplace_back(BRICK_DISTANCE, BRICK_SEGMENTS, 2.f * j * Geometry::pi / 8.f + offset, height);
-        }
-    }
+    // for (float i = 0; i < 1.f; ++i) {
+    //     float offset = i * 1.9f;
+    //     float height = i * BRICK_HEIGHT;
+    //     for (int j = 0; j < 8; ++j) {
+    //         bricks.emplace_back(BRICK_DISTANCE, BRICK_SEGMENTS, 2.f * j * Geometry::pi / 8.f + offset, height);
+    //     }
+    // }
 }
 
 void Application::Step() {
-    for (auto& pad : pads) {
-        pad.Rotate(movement);
-    }
-
     if (isPaused) {
         return;
     }
+
     if (isStepping) {
         isPaused = true;
     }
 
+    // Move all balls
     for (auto& ball : balls) {
         ball.Step();
     }
 
+    // Move all pads
+    for (auto& pad : pads) {
+        pad.Rotate(movement);
+    }
+
+    // Check for collisions
     for (auto& ball : balls) {
         ball.Collision(bounds);
         for (auto& pad : pads) {
@@ -156,7 +160,7 @@ void Application::Render() {
     glUniform3fv(eyePositionLoc, 1, &camera.GetEyePosition());
 
     // Set light
-    auto lightPos = Geometry::Vector<3>{ 5.f / 4.f + 0.75f, 1.f, 0.f };//.Rotate(appTime, { 0.f, 1.f, 0.f });
+    auto lightPos = Geometry::Vector<3>{ 5.f / 4.f + 0.75f, 1.f, 0.f }; //.Rotate(appTime, { 0.f, 1.f, 0.f });
     glUniform4f(lightPositionLoc, lightPos.X(), lightPos.Y(), lightPos.Z(), 0.f);
 
     // Colors
@@ -196,7 +200,10 @@ void Application::Render() {
 }
 
 void Application::Gui() {
-    if (nk_begin(ctx, "Debug", nk_rect(10, 10, 230, 400), NK_WINDOW_TITLE | NK_WINDOW_BORDER)) {
+    if (!isDebug) {
+        return;
+    }
+    if (nk_begin(ctx, "Debug", nk_rect(10, 10, 230, 420), NK_WINDOW_TITLE | NK_WINDOW_BORDER)) {
         nk_layout_row_dynamic(ctx, 32, 1);
         nk_label(ctx, "Ball", NK_TEXT_LEFT);
         auto ballPosition = balls[0].Position();
@@ -236,13 +243,17 @@ void Application::Gui() {
         nk_label(ctx, std::to_string(endAngle).c_str(), NK_TEXT_LEFT);
 
         nk_layout_row_static(ctx, 26, 100, 2);
+        nk_label(ctx, "Movement: ", NK_TEXT_LEFT);
+        nk_label(ctx, Geometry::ToString(movement, 2).c_str(), NK_TEXT_LEFT);
+
+        nk_layout_row_static(ctx, 26, 100, 2);
         if (nk_button_label(ctx, isPaused ? "Play" : "Pause")) {
             isPaused = !isPaused;
         }
         if (nk_button_label(ctx, isStepping ? "Step On" : "Step Off")) {
             isStepping = !isStepping;
         }
-        
+
         if (nk_button_label(ctx, "Respawn balls")) {
             balls.clear();
             SpawnBalls();
@@ -315,6 +326,11 @@ void Application::OnKey(int key, int scancode, int actions, int mods) {
             movement += movementSpeed;
         } else if (actions == GLFW_RELEASE) {
             movement -= movementSpeed;
+        }
+        return;
+    case GLFW_KEY_F1:
+        if (actions == GLFW_PRESS) {
+            isDebug = !isDebug;
         }
     default:
         break;

@@ -42,6 +42,7 @@ private:
 
     bool isPaused = false;
     bool isStepping = false;
+    bool isDebug = true;
 
     // Attr and uniform locations
     GLint modelMatrixLoc = -1;
