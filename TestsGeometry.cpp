@@ -6,14 +6,14 @@
 #include <glm/gtx/rotate_vector.hpp>
 
 #include "Geometry"
+#include <iostream>
 
 using namespace Geometry;
-
 #define GLMOperators(size)                                                                        \
     bool operator==(const Matrix<size>& lhs, const glm::mat##size& rhs) {                         \
         for (size_t j = 0; j < size; ++j)                                                         \
             for (size_t i = 0; i < size; ++i)                                                     \
-                if (lhs[i][j] != rhs[i][j])                                                       \
+                if (std::abs(lhs[i][j] - rhs[j][i]) > 0.001f)                                                       \
                     return false;                                                                 \
         return true;                                                                              \
     }                                                                                             \
@@ -459,10 +459,22 @@ TEST_CASE("Matrix") {
     }
 
     SECTION("Perspective") {
+        auto myMat = Perspective(45.f, 16.f / 9.f, 1.f, 100.f);
+        glm::mat4 glmMat = glm::perspective(glm::radians(45.f), 16.f / 9.f, 1.f, 100.f);
+        std::stringstream ss;
+        ss << glmMat;
+        INFO(ss.str());
+        CHECK(myMat == glmMat);
     }
-}
 
-TEST_CASE("Ray") {
+    SECTION("Ortho") {
+        auto myMat = Ortho(0.f, 16.f, 0.f, 9.f, 1.f, 100.f);
+        glm::mat4 glmMat = glm::ortho(0.f, 16.f, 0.f, 9.f, 1.f, 100.f);
+        std::stringstream ss;
+        ss << glmMat;
+        INFO(ss.str());
+        CHECK(myMat == glmMat);
+    }
 }
 
 TEST_CASE("Utility") {

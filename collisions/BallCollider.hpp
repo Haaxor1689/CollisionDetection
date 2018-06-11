@@ -17,7 +17,7 @@ public:
     const float Mass;
     const float MaxVelocity;
 
-    BallCollider(Geometry::Vector<3>&& position, Geometry::Vector<3>&& velocity, float radius, float maxVelocity)
+    BallCollider(Geometry::Vector<3>&& position, Geometry::Vector<3>&& velocity, float radius, float maxVelocity = 1.5f)
         : position(std::move(position)),
           velocity(std::move(velocity)),
           Radius(radius),

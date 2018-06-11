@@ -35,6 +35,17 @@ inline Matrix<4> Perspective(float fov, float aspect, float nearPlane, float far
     return ret;
 }
 
+inline Matrix<4> Ortho(float left, float right, float bottom, float top, float nearPlane, float farPlane) {
+    auto ret = Matrix<4>::Identity();
+    ret[0][0] = 2.f / (right - left);
+    ret[1][1] = 2.f / (top - bottom);
+    ret[0][3] = - (right + left) / (right - left);
+    ret[1][3] = - (top + bottom) / (top - bottom);
+    ret[2][2] = - 2.f / (farPlane - nearPlane);
+    ret[2][3] = - (farPlane + nearPlane) / (farPlane - nearPlane);
+    return ret;
+}
+
 inline Matrix<4> LookAt(Vector<3> eye, Vector<3> center, Vector<3> up) {
     auto f = Vector<3>::Normalized(center - eye);
     auto s = Vector<3>::Normalized(Vector<3>::Cross(f, up));

@@ -155,13 +155,31 @@ void Application::Render() {
     // Clear screen, both color and depth
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Set cameras projection and view matrices and eye location
-    const auto projectionMatrix = Geometry::Perspective(45.0f, aspectRatio, 1.f, 200.0f);
-    const auto viewMatrix = LookAt(camera.GetEyePosition(), Geometry::Vector<3>(), { 0.0f, 1.0f, 0.0f });
+    // Set camera's projection and view matrices and eye location
+    auto projectionMatrix = Geometry::Perspective(45.0f, aspectRatio, 1.f, 200.f);
+    Geometry::Vector<3> eye;
+    Geometry::Vector<3> center = {};
+    Geometry::Vector<3> up = { 0.0f, 1.0f, 0.0f };
+    switch (cameraMode) {
+    case CameraMode::Perspective:
+        eye = { 0.f, 80.f, -60.f };
+        center = { 0.f, -10.f, 0.f };
+        break;
+    case CameraMode::Top:
+        projectionMatrix = Geometry::Ortho(-RADIUS * aspectRatio, RADIUS * aspectRatio, -RADIUS, RADIUS, 1.f, 200.f);
+        eye = { 0.f, 100.f, 0.f };
+        up = { 0.0f, 0.0f, 1.0f };
+        break;
+    case CameraMode::Ball:
+        eye = Geometry::Vector<3>(balls[selectedBall].Position()).Translate({ 0.f, 5.f, 0.f }) * 2.5f;
+        // center = balls[selectedBall].Position();
+        break;
+    }
+    const auto viewMatrix = LookAt(eye, center, up);
 
     glUniformMatrix4fv(projectionMatrixLoc, 1, GL_FALSE, &projectionMatrix);
     glUniformMatrix4fv(viewMatrixLoc, 1, GL_FALSE, &viewMatrix);
-    glUniform3fv(eyePositionLoc, 1, &camera.GetEyePosition());
+    glUniform3fv(eyePositionLoc, 1, &eye);
 
     // Set light
     auto lightPos = Geometry::Vector<3>{ 5.f / 4.f + 0.75f, 1.f, 0.f }; //.Rotate(appTime, { 0.f, 1.f, 0.f });
@@ -358,7 +376,7 @@ void Application::Gui() {
     if (nk_begin(ctx, "Controlls", nk_rect(10, nextWindowY, 270, 170), NK_WINDOW_TITLE | NK_WINDOW_BORDER | NK_WINDOW_MINIMIZABLE)) {
         const auto labelSize = 140;
         const auto keySize = 100;
-        
+
         nk_layout_row_begin(ctx, NK_STATIC, 26, 2);
         nk_layout_row_push(ctx, labelSize);
         nk_label(ctx, "Rotate pads:", NK_TEXT_LEFT);
@@ -449,12 +467,18 @@ void Application::SpawnBricks() {
     }
 }
 
-void Application::OnMousePosition(double x, double y) {
-    camera.OnMouseMove(x, y);
-}
-
-void Application::OnMouseButton(int button, int action, int mods) {
-    camera.OnMouseButton(button, action, mods);
+void Application::NextCameraMode() {
+    switch (cameraMode) {
+    case CameraMode::Perspective:
+        cameraMode = CameraMode::Top;
+        break;
+    case CameraMode::Top:
+        cameraMode = CameraMode::Ball;
+        break;
+    case CameraMode::Ball:
+        cameraMode = CameraMode::Perspective;
+        break;
+    }
 }
 
 void Application::OnKey(int key, int scancode, int actions, int mods) {
@@ -485,12 +509,17 @@ void Application::OnKey(int key, int scancode, int actions, int mods) {
             SpawnBricks();
             isPaused = true;
         }
-        break;
+        return;
     case GLFW_KEY_SPACE:
         if (actions == GLFW_PRESS) {
             isPaused = !isPaused;
         }
-        break;
+        return;
+    case GLFW_KEY_C:
+        if (actions == GLFW_PRESS) {
+            NextCameraMode();
+        }
+        return;
     default:
         break;
     }

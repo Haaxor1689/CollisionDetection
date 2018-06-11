@@ -12,6 +12,10 @@
 #include "Collisions"
 
 class Application {
+    enum class CameraMode {
+        Perspective, Top, Ball
+    };
+
 public:
     Application(int initialWindowWidth, int initialWindowHeight, const std::string& title)
         : Window(initialWindowWidth, initialWindowHeight, title) {
@@ -19,8 +23,6 @@ public:
         Window.SetUserPointer(this);
         Window.SetKeyCallback(OnKey);
         Window.SetSizeCallback(OnResize);
-        Window.SetMouseButtonCallback(OnMouseButton);
-        Window.SetMousePositionCallback(OnMousePosition);
     }
 
     void Init();
@@ -29,8 +31,6 @@ public:
     void Gui();
 
     void OnKey(int key, int scancode, int actions, int mods);
-    void OnMousePosition(double x, double y);
-    void OnMouseButton(int button, int action, int mods);
     void OnResize(int width, int height);
 
     Window Window;
@@ -38,7 +38,7 @@ public:
 private:
     std::unique_ptr<ShaderProgram> program{};
 
-    Camera camera;
+    CameraMode cameraMode = CameraMode::Perspective;
 
     bool isPaused = true;
     bool isStepping = false;
@@ -104,20 +104,11 @@ private:
     void DrawObject(const Mesh& mesh, const Collisions::Collider& collider) const;
     void SpawnBalls();
     void SpawnBricks();
+    void NextCameraMode();
 
     static void OnKey(GLFWwindow* window, int key, int scancode, int actions, int mods) {
         auto thisPointer = static_cast<Application*>(glfwGetWindowUserPointer(window));
         thisPointer->OnKey(key, scancode, actions, mods);
-    }
-
-    static void OnMousePosition(GLFWwindow* window, double x, double y) {
-        auto thisPointer = static_cast<Application*>(glfwGetWindowUserPointer(window));
-        thisPointer->OnMousePosition(x, y);
-    }
-
-    static void OnMouseButton(GLFWwindow* window, int button, int action, int mods) {
-        auto thisPointer = static_cast<Application*>(glfwGetWindowUserPointer(window));
-        thisPointer->OnMouseButton(button, action, mods);
     }
 
     static void OnResize(GLFWwindow* window, int width, int height) {
