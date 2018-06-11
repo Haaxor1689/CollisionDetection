@@ -55,7 +55,7 @@ void Application::Init() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     };
-    
+
     loadAndSetTexture("default", tDefault);
     loadAndSetTexture("stripes", tStripes);
     loadAndSetTexture("bricks", tBricks);
@@ -129,6 +129,7 @@ void Application::Step() {
             // Mark brick for removal if collision occurs
             if (ball.Collision(*brick)) {
                 brick->ShouldBeDeleted = true;
+                score += brickValue;
             }
         }
         for (auto& otherBall : balls) {
@@ -224,6 +225,29 @@ void Application::Render() {
 }
 
 void Application::Gui() {
+    if (isInMenu) {
+        // Main menu
+        const auto mainMenuWIdth = 300;
+        const auto mainMenuHeight = 150;
+        if (nk_begin(ctx, "Debug", nk_rect((Window.GetWidth() - mainMenuWIdth) / 2.f, (Window.GetHeight() - mainMenuHeight) / 2.f, mainMenuWIdth, mainMenuHeight), NK_WINDOW_BORDER)) {
+            const auto menuItemWidth = mainMenuWIdth - 26;
+            nk_layout_row_static(ctx, 52, menuItemWidth, 1);
+            nk_label(ctx, "3D breakout", NK_TEXT_CENTERED);
+
+            nk_layout_row_static(ctx, 26, menuItemWidth, 1);
+            if (nk_button_label(ctx, "Play")) {
+                RestartGame();
+            }
+
+            nk_layout_row_static(ctx, 26, menuItemWidth, 1);
+            if (nk_button_label(ctx, "Exit")) {
+                Window.Close();
+            }
+        }
+        nk_end(ctx);
+        return;
+    }
+
     unsigned nextWindowY = 10;
     // Debug window
     if (nk_begin(ctx, "Debug", nk_rect(10, nextWindowY, 270, 180), NK_WINDOW_TITLE | NK_WINDOW_BORDER | NK_WINDOW_MINIMIZABLE)) {
@@ -345,6 +369,7 @@ void Application::Gui() {
 
     nextWindowY += 40;
 
+    // Game rules window
     if (nk_begin(ctx, "Game rules", nk_rect(10, nextWindowY, 270, 200), NK_WINDOW_TITLE | NK_WINDOW_BORDER | NK_WINDOW_MINIMIZABLE)) {
         nextWindowY += 170;
 
@@ -375,6 +400,7 @@ void Application::Gui() {
 
     nextWindowY += 40;
 
+    // Controlls window
     if (nk_begin(ctx, "Controlls", nk_rect(10, nextWindowY, 270, 170), NK_WINDOW_TITLE | NK_WINDOW_BORDER | NK_WINDOW_MINIMIZABLE)) {
         const auto labelSize = 140;
         const auto keySize = 100;
@@ -402,6 +428,32 @@ void Application::Gui() {
         nk_label(ctx, "Change camera:", NK_TEXT_LEFT);
         nk_layout_row_push(ctx, keySize);
         nk_label(ctx, "C", NK_TEXT_LEFT);
+
+        nk_layout_row_begin(ctx, NK_STATIC, 26, 2);
+        nk_layout_row_push(ctx, labelSize);
+        nk_label(ctx, "Menu:", NK_TEXT_LEFT);
+        nk_layout_row_push(ctx, keySize);
+        nk_label(ctx, "Esc", NK_TEXT_LEFT);
+    }
+    nk_end(ctx);
+
+    // Score window
+    const auto windowWidth = 270;
+    if (nk_begin(ctx, "Score", nk_rect(Window.GetWidth() - windowWidth - 10, 10, windowWidth, 80), NK_WINDOW_BORDER)) {
+        const auto labelSize = 140;
+        const auto keySize = 100;
+
+        nk_layout_row_begin(ctx, NK_STATIC, 26, 2);
+        nk_layout_row_push(ctx, labelSize);
+        nk_label(ctx, "Score:", NK_TEXT_LEFT);
+        nk_layout_row_push(ctx, keySize);
+        nk_label(ctx, std::to_string(score).c_str(), NK_TEXT_LEFT);
+
+        nk_layout_row_begin(ctx, NK_STATIC, 26, 2);
+        nk_layout_row_push(ctx, labelSize);
+        nk_label(ctx, "Remaining bricks:", NK_TEXT_LEFT);
+        nk_layout_row_push(ctx, keySize);
+        nk_label(ctx, std::to_string(bricks.size()).c_str(), NK_TEXT_LEFT);
     }
     nk_end(ctx);
 }
@@ -469,6 +521,14 @@ void Application::SpawnBricks() {
     }
 }
 
+void Application::RestartGame() {
+    SpawnBalls();
+    SpawnBricks();
+    isPaused = false;
+    isInMenu = false;
+    score = 0;
+}
+
 void Application::NextCameraMode() {
     switch (cameraMode) {
     case CameraMode::Perspective:
@@ -491,14 +551,14 @@ void Application::OnKey(int key, int scancode, int actions, int mods) {
     case GLFW_KEY_F:
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         return;
-    case GLFW_KEY_A:
+    case GLFW_KEY_D:
         if (actions == GLFW_PRESS) {
             movement -= movementSpeed;
         } else if (actions == GLFW_RELEASE) {
             movement += movementSpeed;
         }
         return;
-    case GLFW_KEY_D:
+    case GLFW_KEY_A:
         if (actions == GLFW_PRESS) {
             movement += movementSpeed;
         } else if (actions == GLFW_RELEASE) {
@@ -507,9 +567,7 @@ void Application::OnKey(int key, int scancode, int actions, int mods) {
         return;
     case GLFW_KEY_R:
         if (actions == GLFW_PRESS) {
-            SpawnBalls();
-            SpawnBricks();
-            isPaused = true;
+            RestartGame();
         }
         return;
     case GLFW_KEY_SPACE:
@@ -522,6 +580,11 @@ void Application::OnKey(int key, int scancode, int actions, int mods) {
             NextCameraMode();
         }
         return;
+    case GLFW_KEY_ESCAPE:
+        if (actions == GLFW_PRESS) {
+            isInMenu = !isInMenu;
+            isPaused = isInMenu;
+        }
     default:
         break;
     }

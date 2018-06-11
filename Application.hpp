@@ -39,8 +39,12 @@ private:
 
     CameraMode cameraMode = CameraMode::Perspective;
 
+    bool isInMenu = true;
     bool isPaused = true;
     bool isStepping = false;
+
+    unsigned score = 0;
+    unsigned brickValue = 25;
 
     int ballCount = 1;
     int brickRowCount = 4;
@@ -105,6 +109,7 @@ private:
     void DrawObject(const Mesh& mesh, const Collisions::Collider& collider) const;
     void SpawnBalls();
     void SpawnBricks();
+    void RestartGame();
     void NextCameraMode();
 
     static void OnKey(GLFWwindow* window, int key, int scancode, int actions, int mods) {

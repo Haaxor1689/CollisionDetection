@@ -21,6 +21,7 @@ public:
     void SetMouseButtonCallback(GLFWmousebuttonfun function) const;
 
     bool ShouldClose() const;
+    void Close() const;
     void SwapBuffers() const;
     void PollEvents();
 

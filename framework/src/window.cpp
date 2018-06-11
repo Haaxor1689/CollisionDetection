@@ -9,15 +9,15 @@ Window::Window(int initialWidth, int initialHeight, const std::string& title)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 
-    this->window = glfwCreateWindow(initialWidth, initialHeight, title.c_str(), nullptr, nullptr);
+    window = glfwCreateWindow(initialWidth, initialHeight, title.c_str(), nullptr, nullptr);
 
-    if (!this->window) {
+    if (!window) {
         glfwTerminate();
         throw std::runtime_error("Could not create window!");
     }
 
     // Make window's context current
-    glfwMakeContextCurrent(this->window);
+    glfwMakeContextCurrent(window);
 
     // Load OpenGL functions
     if (!gladLoadGL()) {
@@ -26,37 +26,41 @@ Window::Window(int initialWidth, int initialHeight, const std::string& title)
 }
 
 void Window::SetUserPointer(void* pointer) const {
-    glfwSetWindowUserPointer(this->window, pointer);
+    glfwSetWindowUserPointer(window, pointer);
 }
 
 void Window::SetPosCallback(GLFWwindowposfun function) const {
-    glfwSetWindowPosCallback(this->window, function);
+    glfwSetWindowPosCallback(window, function);
 }
 
 void Window::SetSizeCallback(GLFWwindowsizefun function) const {
-    glfwSetWindowSizeCallback(this->window, function);
+    glfwSetWindowSizeCallback(window, function);
 }
 
 void Window::SetCloseCallback(GLFWwindowclosefun function) const {
-    glfwSetWindowCloseCallback(this->window, function);
+    glfwSetWindowCloseCallback(window, function);
 }
 
 void Window::SetKeyCallback(GLFWkeyfun function) const {
-    glfwSetKeyCallback(this->window, function);
+    glfwSetKeyCallback(window, function);
 }
 void Window::SetMousePositionCallback(GLFWcursorposfun function) const {
-    glfwSetCursorPosCallback(this->window, function);
+    glfwSetCursorPosCallback(window, function);
 }
 void Window::SetMouseButtonCallback(GLFWmousebuttonfun function) const {
-    glfwSetMouseButtonCallback(this->window, function);
+    glfwSetMouseButtonCallback(window, function);
 }
 
 bool Window::ShouldClose() const {
-    return glfwWindowShouldClose(this->window) != 0;
+    return glfwWindowShouldClose(window) != 0;
+}
+
+void Window::Close() const {
+    glfwSetWindowShouldClose(window, GL_TRUE);
 }
 
 void Window::SwapBuffers() const {
-    glfwSwapBuffers(this->window);
+    glfwSwapBuffers(window);
 }
 
 void Window::PollEvents() {
@@ -64,8 +68,8 @@ void Window::PollEvents() {
 }
 
 void Window::Resize(int width, int height) {
-    this->width = width;
-    this->height = height;
+    width = width;
+    height = height;
 }
 
 Window::~Window() {
