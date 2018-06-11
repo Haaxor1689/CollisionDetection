@@ -7,7 +7,6 @@
 #include "mesh.hpp"
 #include "program.hpp"
 #include "window.hpp"
-#include "camera.hpp"
 
 #include "Collisions"
 
@@ -44,8 +43,8 @@ private:
     bool isStepping = false;
 
     int ballCount = 1;
-    int brickRowCount = 5;
-    int brickColumnCount = 8;
+    int brickRowCount = 4;
+    int brickColumnCount = 10;
 
     // Attr and uniform locations
     GLint modelMatrixLoc = -1;
@@ -67,6 +66,8 @@ private:
     GLint eyePositionLoc = -1;
 
     // Textures
+    GLuint tDefault = 0;
+    GLuint tStripes = 0;
     GLuint tBricks = 0;
     GLuint tGlass = 0;
     GLuint tRune = 0;

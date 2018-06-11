@@ -55,7 +55,9 @@ void Application::Init() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     };
-
+    
+    loadAndSetTexture("default", tDefault);
+    loadAndSetTexture("stripes", tStripes);
     loadAndSetTexture("bricks", tBricks);
     loadAndSetTexture("glass", tGlass);
     loadAndSetTexture("roof", tRoof);
@@ -70,8 +72,8 @@ void Application::Init() {
     brick.CreateVao(positionLoc, normalLoc, texCoordLoc);
 
     cube.SetTexture(tRoof);
-    sphere.SetTexture(tGlass);
-    ground.SetTexture(tBricks);
+    sphere.SetTexture(tDefault);
+    ground.SetTexture(tStripes);
     pad.SetTexture(tWood);
     brick.SetTexture(tRune);
 
@@ -182,7 +184,7 @@ void Application::Render() {
     glUniform3fv(eyePositionLoc, 1, &eye);
 
     // Set light
-    auto lightPos = Geometry::Vector<3>{ 5.f / 4.f + 0.75f, 1.f, 0.f }; //.Rotate(appTime, { 0.f, 1.f, 0.f });
+    auto lightPos = Geometry::Vector<3>{ 0.5f, 0.5f, 0.f };
     glUniform4f(lightPositionLoc, lightPos.X(), lightPos.Y(), lightPos.Z(), 0.f);
 
     // Colors

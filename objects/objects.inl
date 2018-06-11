@@ -41,12 +41,12 @@ inline std::vector<float> GetGroundVertices() {
     ret.reserve((SEGMENTS + 2) * 5);
 
     // Center
-    EmplaceVert(ret, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f);
+    EmplaceVert(ret, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.5f, 0.f);
 
     float x = RADIUS;
     float z = 0.f;
     for (unsigned j = 0; j <= SEGMENTS; ++j) {
-        EmplaceVert(ret, x, 0.f, z, 0.f, 1.f, 0.f, x, z);
+        EmplaceVert(ret, x, 0.f, z, 0.f, 1.f, 0.f, j % 2 == 0 ? 0.f : 1.f, 1.f);
         Rotate(x, z);
     }
     return ret;
