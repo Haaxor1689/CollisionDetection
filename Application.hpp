@@ -42,6 +42,7 @@ private:
     bool isInMenu = true;
     bool isPaused = true;
     bool isStepping = false;
+    bool hasWon = false;
 
     unsigned score = 0;
     unsigned brickValue = 25;
@@ -110,6 +111,7 @@ private:
     void SpawnBalls();
     void SpawnBricks();
     void RestartGame();
+    void WinGame();
     void NextCameraMode();
 
     static void OnKey(GLFWwindow* window, int key, int scancode, int actions, int mods) {

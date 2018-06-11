@@ -109,6 +109,11 @@ void Application::Step() {
     // Remove destroyed bricks
     bricks.erase(std::remove_if(bricks.begin(), bricks.end(), [](const auto& brick) { return brick->ShouldBeDeleted; }), bricks.end());
 
+    if (bricks.size() == 0) {
+        WinGame();
+        return;
+    }
+
     // Move all balls
     for (auto& ball : balls) {
         ball.Step();
@@ -225,11 +230,11 @@ void Application::Render() {
 }
 
 void Application::Gui() {
+    const auto mainMenuWIdth = 300;
     if (isInMenu) {
-        // Main menu
-        const auto mainMenuWIdth = 300;
-        const auto mainMenuHeight = 150;
-        if (nk_begin(ctx, "Debug", nk_rect((Window.GetWidth() - mainMenuWIdth) / 2.f, (Window.GetHeight() - mainMenuHeight) / 2.f, mainMenuWIdth, mainMenuHeight), NK_WINDOW_BORDER)) {
+        // Main menu window
+        const auto windowHeight = 140;
+        if (nk_begin(ctx, "Debug", nk_rect((Window.GetWidth() - mainMenuWIdth) / 2.f, (Window.GetHeight() - windowHeight) / 2.f, mainMenuWIdth, windowHeight), NK_WINDOW_BORDER)) {
             const auto menuItemWidth = mainMenuWIdth - 26;
             nk_layout_row_static(ctx, 52, menuItemWidth, 1);
             nk_label(ctx, "3D breakout", NK_TEXT_CENTERED);
@@ -237,6 +242,35 @@ void Application::Gui() {
             nk_layout_row_static(ctx, 26, menuItemWidth, 1);
             if (nk_button_label(ctx, "Play")) {
                 RestartGame();
+            }
+
+            nk_layout_row_static(ctx, 26, menuItemWidth, 1);
+            if (nk_button_label(ctx, "Exit")) {
+                Window.Close();
+            }
+        }
+        nk_end(ctx);
+        return;
+    }
+
+    if (hasWon) {
+        // You won window
+        const auto windowHeight = 200;
+        if (nk_begin(ctx, "Debug", nk_rect((Window.GetWidth() - mainMenuWIdth) / 2.f, (Window.GetHeight() - windowHeight) / 2.f, mainMenuWIdth, windowHeight), NK_WINDOW_BORDER)) {
+            const auto menuItemWidth = mainMenuWIdth - 26;
+            nk_layout_row_static(ctx, 52, menuItemWidth, 1);
+            nk_label(ctx, "You won", NK_TEXT_CENTERED);
+
+            nk_layout_row_static(ctx, 26, menuItemWidth, 1);
+            nk_label(ctx, "Final score:", NK_TEXT_CENTERED);
+
+            nk_layout_row_static(ctx, 26, menuItemWidth, 1);
+            nk_label(ctx, std::to_string(score).c_str(), NK_TEXT_CENTERED);
+
+            nk_layout_row_static(ctx, 26, menuItemWidth, 1);
+            if (nk_button_label(ctx, "Restart")) {
+                RestartGame();
+                hasWon = false;
             }
 
             nk_layout_row_static(ctx, 26, menuItemWidth, 1);
@@ -526,7 +560,13 @@ void Application::RestartGame() {
     SpawnBricks();
     isPaused = false;
     isInMenu = false;
+    hasWon = false;
     score = 0;
+}
+
+void Application::WinGame() {
+    hasWon = true;
+    isPaused = true;
 }
 
 void Application::NextCameraMode() {
@@ -571,7 +611,7 @@ void Application::OnKey(int key, int scancode, int actions, int mods) {
         }
         return;
     case GLFW_KEY_SPACE:
-        if (actions == GLFW_PRESS) {
+        if (actions == GLFW_PRESS && !isInMenu) {
             isPaused = !isPaused;
         }
         return;
@@ -582,6 +622,9 @@ void Application::OnKey(int key, int scancode, int actions, int mods) {
         return;
     case GLFW_KEY_ESCAPE:
         if (actions == GLFW_PRESS) {
+            if (hasWon) {
+                RestartGame();
+            }
             isInMenu = !isInMenu;
             isPaused = isInMenu;
         }
