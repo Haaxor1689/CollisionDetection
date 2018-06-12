@@ -145,7 +145,7 @@ void Application::Step() {
 
 void Application::Render() {
     nk_glfw3_new_frame();
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClearColor(0.8f, 0.85f, 0.9f, 0.0f);
     glClearDepth(1.0);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
